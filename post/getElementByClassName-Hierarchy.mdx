@@ -1,0 +1,70 @@
+---
+title: "Implement getElementByClassName() by given hierarchy string in JavaScript"
+publishedAt: "2023-12-07"
+updatedAt: "2023-12-07"
+tags:
+  - JavaScript
+  - Pollyfills
+  - Coding
+---
+
+Write a function getByClassNameHierarchy() in javaScript that takes a path of class names and returns the last element of that path.
+
+given a **HTML Document** we have to find the element that represent the given class **Hierarchy**
+
+```js
+<div id="root">
+    <div class="a" id="a-1">
+        <div class="b" id="b-1">
+            <div class="c" id="c-1"></div>
+            <div class="c" id="c-2"></div>
+        </div>
+        <div class="c" id="c-3"></div>
+    </div>
+</div>
+```
+for a class *'a>b'* the output will be *['b-1']*\
+*'b-1'* element is the direct child of class 'a'
+
+```js
+const getByClassNameHierarchy = (root, className) => {
+    let result = []; // result array
+
+    let classList = className.split(">"); // we classNames now in order 
+
+    // element => current element we check
+    // index => index of class name we are checking 
+    const traverse = ( element , index ) => {
+
+        const currentClass = classList[index]; 
+
+        // check for recursion break point
+        // when we reach the end of the class list then break the loop
+
+        if( index === classList.length - 1 && element.classList.contains(currentClass) ) {
+            result.push( element.id );
+            return;
+        }
+        // check for children
+        for(let child of element.children) {
+            // if current elem has current class look for next class
+            
+            if( element.classList.contains(currentClass) ) {
+                traverse( child , index+1 );
+            }
+            // else check classes from scratch in child comp 
+            else {
+                traverse( child , 0);
+            }
+        }
+    }
+    traverse(root , 0);
+    return result;
+}
+
+let root = document.getElementById("root");
+console.log(getByClassNameHierarchy(root , "a>b")) // ['b-1']
+console.log(getByClassNameHierarchy(root , "a>c")) // [c-1]
+console.log(getByClassNameHierarchy(root , "b>c")) // ['c-1', 'c-2']
+console.log(getByClassNameHierarchy(root , "a>b>c")) // ['c-1', 'c-2']
+```

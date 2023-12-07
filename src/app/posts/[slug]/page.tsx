@@ -4,6 +4,8 @@ import { useMDXComponent } from 'next-contentlayer/hooks'
 import { allPosts } from "contentlayer/generated";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next';
+import { parseISO } from "date-fns";
+import format from "date-fns/format";
 
 type Params = { params: { slug: string } }
 
@@ -14,10 +16,10 @@ export function generateStaticParams() {
 }
 
 
-export function generateMetadata({ params }: Params) : Metadata {
+export function generateMetadata({ params }: Params): Metadata {
     let post = allPosts.find(post => post.url === params.slug);
 
-    if(!post) {
+    if (!post) {
         return {
             title: "Post not found",
         }
@@ -37,18 +39,20 @@ export default function Page({ params }: Params) {
     }
     const MDXContent = useMDXComponent(post.body.code)
 
+    let dateFormat = format(new Date(post.publishedAt), 'yyyy-MM-dd')
+
     return <section>
         <Link href="/posts" className="inline-flex gap-x-2 items-center font-medium text-2xl text-neutral-200 hover:text-neutral-400 hover:no-underline">
             <BsArrowLeft /> Back
         </Link>
 
-        <h1 className="mt-10 mb-3 text-4xl text-white font-semibold">
+        <h1 className="mt-10 mb-2 text-4xl text-white font-semibold">
             {post.title}
         </h1>
-
+        <p className="capitalize text-neutral-200 text-lg ">published on : <span className="font-medium">{dateFormat}</span></p>
         {
             post.tags &&
-            <ul className="flex flex-wrap gap-2">
+            <ul className="flex flex-wrap gap-2 mt-5">
                 {post.tags.map((tag) => <li className="font-medium text-sm" key={tag}> #{tag}</li>)}
             </ul>
         }
