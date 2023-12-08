@@ -1,0 +1,105 @@
+---
+title: "Extend Array such that event gets dispatched when items added or removed in JavaScript"
+publishedAt: "2023-12-08"
+updatedAt: "2023-12-08"
+tags:
+  - JavaScript
+  - Pollyfills
+  - Coding
+---
+
+Add Event Listeners to array, so that all the registered events get dispatched when items added or removed in JavaScript
+
+```js
+Input:
+const arr = [];
+arr.addListener('add', (eventName, items, array) => {
+  console.log('items were added', items);
+});
+
+arr.addListener('add', (eventName, items, array) => {
+  console.log('items were added again', items);
+});
+
+arr.addListener('remove', (eventName, item, array) => {
+  console.log(item, ' was removed');
+});
+
+arr.pushWithEvent('add', [4, 5]);
+arr.popWithEvent('remove');
+
+
+Output:
+"items were added" // [object Array] (2)
+[4,5]
+
+"items were added again" // [object Array] (2)
+[4,5]
+
+5 " was removed"
+```
+
+we are going to extend **Array.prototype** object 
+
+on creating a new array, methods we added in prototype will be extended
+
+```js
+Array.prototype.listeners = {}; // listeners obj for each event
+
+Array.prototype.addListener = function( eventName , callback ) {
+    if( !this.listeners[eventName] ) {
+        this.listeners[eventName] = []
+    }
+
+    this.listeners[eventName].push(callback);
+}
+
+Array.prototype.pushWithEvent = function( eventName , args ) {
+    this.push(...args); // this ref to array
+
+    this.triggerEvent( eventName , args );
+}
+
+Array.prototype.popWithEvent = function( eventName ) {
+    let popItem = this.pop(); // this ref to array
+
+    this.triggerEvent( eventName , popItem );
+}
+
+Array.prototype.triggerEvent = function( eventName , args ) {
+    if(this.listeners[eventName]) { // if callback fns available
+        this.listeners[eventName].forEach( callback => {
+            callback( eventName , args , this );
+        } ) 
+    }
+}
+
+const arr = [];
+
+// first event callback fn for 'add' event
+arr.addListener('add', (eventName, items, array) => {
+    console.log('items are added ', items);
+})
+
+// second event callback fn for 'add' event
+arr.addListener('add', (eventName, items, array) => {
+    console.log('items are added again', items);
+})
+
+// first event callback fn for 'remove' event
+arr.addListener('remove', (eventName, item, array) => {
+    console.log(item, ' was removed from array');
+})
+
+arr.pushWithEvent('add', [4, 5]);
+arr.popWithEvent('remove');
+```
+**Array.prototype.listeners = \{\}** we are using object to hold all the callback function based on their events name
+
+**Array.prototype.addListener = fn()** we are adding *addListener* function to the prototype
+
+**Note** we have to use **function()** here so that we can use **this** object\
+if we use **() => \{\}** then **this** will refer to global this.
+
+similarly adding **pushWithEvent** and **popWithEvent** functions to the prototype.\ 
+Based on event name we will trigger the callback functions we stored in **listeners** Object.
