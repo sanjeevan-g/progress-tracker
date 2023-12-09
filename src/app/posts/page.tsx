@@ -3,6 +3,7 @@
 import { NoPostFound } from "@/components/NoPostFound";
 import { SearchBar } from "@/components/SearchBar";
 import { Post, allPosts } from "contentlayer/generated";
+import { compareDesc, parseISO } from "date-fns";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -14,6 +15,8 @@ export default function Page() {
     let postData: Post[] = allPosts.filter(post => {
         return query.length < 3 || post.title.toLowerCase().includes(query.toLowerCase()) || post.tags?.some((tag) => tag.toLowerCase().includes(query.toLowerCase()));
     });
+
+    postData.sort( (a, b) => compareDesc(parseISO(a.publishedAt), parseISO(b.publishedAt)) )
 
     return <section>
         <h1 className="font-medium text-2xl text-white mb-8">

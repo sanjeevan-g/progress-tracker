@@ -1,0 +1,54 @@
+---
+title: "Implement useToggle() Hook in React"
+publishedAt: "2023-12-09"
+updatedAt: "2023-12-09"
+tags:
+  - React
+  - CustomHook
+  - useEffect
+---
+
+we need to create a custom hook that gets **(array , index)** as parameters
+
+it returns **[ currentIndValue , toggleMethod ]** as output
+
+```js
+import { useCallback, useState } from "react";
+
+const useToggle = (arr, index = 0) => {
+  // we use state to hold index value
+  const [curInd, setCurInd] = useState(index);
+
+  // we use useCallback to memoize the function
+  const toggle = useCallback(() => {
+    setCurInd((prevInd) => (prevInd >= arr.length - 1 ? 0 : prevInd + 1));
+  }, [arr]);
+
+  return [toggle, arr[curInd]];
+};
+
+export default useToggle;
+```
+
+```jsx
+// App.jsx
+const [toggle, toggleValue] = useToggle([1, 2, 3, 4], 2);
+return => {
+    <p> value : { toggleValue } </p>
+    <button onClick={toggle}> toggle </button>
+}
+```
+
+**useCallback** hook is for performance optimization, toggle function will not be initialized again and again on re-renders
+
+**(prevInd >= arr.length - 1 ? 0 : prevInd + 1)** when we reach the end of the array, index has to be 0 again
+
+## useEffect() hook
+
+some thoughts about this hook
+
+- useEffect hook has three state lifecycles
+- on **[ ]** dependency it runs after initial page is mounted
+- this will run if any of the dependencies are changed
+- it also has **unmount** lifecycle
+- if we return some function in useEffect, it will run on component unmount.
