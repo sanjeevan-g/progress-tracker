@@ -17,10 +17,11 @@ function calculateMaxStreak(posts: Post[]): number {
     if (posts.length === 0) return 0;
     let res = 1;
     let max = 1;
-    posts.slice().sort((a, b) => compareAsc(parseISO(a.publishedAt), parseISO(b.publishedAt)))
 
-    for (let i = 1; i < posts.length; i++) {
-        let diff = Math.abs(differenceInCalendarDays(parseISO(posts[i - 1].publishedAt), parseISO(posts[i].publishedAt)));
+    let sortedPosts = sortPosts(posts , "asc");
+
+    for (let i = 1; i < sortedPosts.length; i++) {
+        let diff = Math.abs(differenceInCalendarDays(parseISO(sortedPosts[i - 1].publishedAt), parseISO(sortedPosts[i].publishedAt)));
         if (diff > 1) { // broke the streak
             res = 1;
         } else if (diff == 1) { // streak coontinues
@@ -33,16 +34,25 @@ function calculateMaxStreak(posts: Post[]): number {
 }
 
 function calculateCurrentStreak(posts: Post[]): number {
-    posts.slice().sort((a, b) => compareDesc(parseISO(a.publishedAt), parseISO(b.publishedAt)))
-    if (posts.length === 0 || differenceInCalendarDays(new Date(), parseISO(posts[0].publishedAt)) > 1) return 0;
+    let sortedPosts = sortPosts(posts , "desc");
+    if (sortedPosts.length === 0 || differenceInCalendarDays(new Date(), parseISO(sortedPosts[0].publishedAt)) > 1) return 0;
 
     let res = 1;
 
-    for (let i = 1; i < posts.length; i++) {
-        let diff = differenceInCalendarDays(parseISO(posts[i - 1].publishedAt), parseISO(posts[i].publishedAt))
+    for (let i = 1; i < sortedPosts.length; i++) {
+        let diff = differenceInCalendarDays(parseISO(sortedPosts[i - 1].publishedAt), parseISO(sortedPosts[i].publishedAt))
         if (diff > 1) break;
         else if (diff === 1) res++;
     }
 
     return res;
+}
+
+function sortPosts(posts: Post[], order : "asc" | "desc"): Post[] {
+
+    if(order === "asc") {
+        return posts.slice().sort((a, b) => compareAsc(parseISO(a.publishedAt), parseISO(b.publishedAt)))
+    }
+
+    return posts.slice().sort((a, b) => compareDesc(parseISO(a.publishedAt), parseISO(b.publishedAt)));
 }
