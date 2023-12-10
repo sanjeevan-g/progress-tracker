@@ -1,0 +1,113 @@
+---
+title: "Detect Overlapping Circles in react"
+publishedAt: "2023-12-10"
+updatedAt: "2023-12-10"
+tags:
+  - React
+  - Math
+---
+
+we have to draw circles on click and if new circle overlaps with existing circle change the color for new circle
+
+- When a user clicks anywhere on the DOM, create a circle around it of constant radius with red background.
+- If two or more circles overlap, change the background of the later circle.
+
+## logic:
+
+- add **click** event listener on DOM
+- on click get the coordinates (x,y)
+- then calculate **top** and **left** values which are (y-radius) and (x - radius) respectively
+- create the new Coordinate object
+- before storing the coordinates in the state check this new coords overlap with old coordinates
+- if it overlaps then change the background color
+- then store the new coordinates in the state array
+
+```js
+function isOverLapping(circle1, circle2) {
+  // Square_root( (x1 - x2)*2 + (y1 - y2)*2)
+  let d = Math.sqrt(
+    (circle1.offsetX - circle2.offsetX) * (circle1.offsetX - circle2.offsetX) +
+      (circle1.offsetY - circle2.offsetY) * (circle1.offsetY - circle2.offsetY)
+  );
+
+  return d <= 2 * RADIUS;
+}
+```
+
+above is the function to compare 2 circles if they overlap or not
+
+```jsx
+export default function OverlapCircle() {
+  const [elemCoords, setElemCoords] = useState([]);
+  const RADIUS = 50;
+
+  function draw(e) {
+    // get the click position
+    const { offsetX, offsetY } = e;
+
+    setElemCoords((prevCords) => {
+      const newCoords = {
+        top: offsetY - RADIUS,
+        left: offsetX - RADIUS,
+        background: "red",
+        offsetX,
+        offsetY,
+      };
+
+      for (let i = 0; i < prevCords.length; i++) {
+        if (isOverLapping(prevCords[i], newCoords)) {
+          newCoords.background = "green";
+          break;
+        }
+      }
+
+      return [...prevCords, newCoords];
+    });
+  }
+
+  function isOverLapping(circle1, circle2) {
+    // Square_root( (x1 - x2)*2 + (y1 - y2)*2)
+    let d = Math.sqrt(
+      (circle1.offsetX - circle2.offsetX) *
+        (circle1.offsetX - circle2.offsetX) +
+        (circle1.offsetY - circle2.offsetY) *
+          (circle1.offsetY - circle2.offsetY)
+    );
+
+    return d <= 2 * RADIUS;
+  }
+
+  // add click event to DOM
+  useEffect(() => {
+    document.addEventListener("click", draw);
+    return () => document.removeEventListener("click", draw);
+  }, []);
+
+  return (
+    <div
+      style={{
+        width: "100vw",
+        maxWidth: "1280px",
+        height: "600px",
+        background: "#ccc",
+        position: "relative",
+      }}
+    >
+      {elemCoords.map((e) => (
+        <div
+          key={e.top + e.left + e.background}
+          style={{
+            position: "absolute",
+            width: 2 * RADIUS,
+            height: 2 * RADIUS,
+            top: e.top,
+            left: e.left,
+            background: e.background,
+            borderRadius: "50%",
+          }}
+        ></div>
+      ))}
+    </div>
+  );
+}
+```
