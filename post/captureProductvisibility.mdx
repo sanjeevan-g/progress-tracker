@@ -1,0 +1,216 @@
+---
+title: "Capture Element in the view after user scrolls "
+publishedAt: "2023-12-11"
+updatedAt: "2023-12-11"
+tags:
+  - Javascript
+  - debounce
+  - Coding
+---
+
+## Problem Statement
+
+**If user scroll and see any property and stays there for more than 5 sec then call API and store that property**
+
+we will create grid elements **blocks** with numbering and appropriate stylings also
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .blocks {
+        flex: 1 300px;
+        height: 300px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 5px;
+        background: red;
+        font-size: 40px;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="blocks">1</div>
+      <div class="blocks">2</div>
+      <div class="blocks">3</div>
+      <div class="blocks">4</div>
+      <div class="blocks">5</div>
+      <div class="blocks">6</div>
+      <div class="blocks">7</div>
+      <div class="blocks">8</div>
+      <div class="blocks">9</div>
+      <div class="blocks">10</div>
+      <div class="blocks">11</div>
+      <div class="blocks">12</div>
+      <div class="blocks">13</div>
+      <div class="blocks">14</div>
+      <div class="blocks">15</div>
+      <div class="blocks">16</div>
+      <div class="blocks">17</div>
+      <div class="blocks">18</div>
+      <div class="blocks">19</div>
+      <div class="blocks">20</div>
+      <div class="blocks">21</div>
+      <div class="blocks">22</div>
+      <div class="blocks">23</div>
+      <div class="blocks">24</div>
+      <div class="blocks">25</div>
+      <div class="blocks">26</div>
+      <div class="blocks">27</div>
+    </div>
+  </body>
+</html>
+```
+
+we have **27 blocks** in the DOM
+
+when we pause scrolling we have to **find which blocks are in the View**
+
+we have 2 subproblems in this
+
+1. A way to check if the element is within the viewport.
+2. A way to make the API call only after the user stops scrolling and waits for some time (5 secs in this case), if the user scrolls before that then we should revoke the call (debounce)
+
+### Element in viewport
+
+```js
+// to find elem in viewport or not we have to check
+// elem.left >= 0 , elem.top >=0 , elem.right < window.innerWidth , elem.bottom < window.innerHeight
+const inViewPost = (elem) => {
+  let boundPos = elem.getBoundingClientRect(); // will get top,left,right,bottom postions on the element
+
+  return (
+    boundPos.top >= 0 &&
+    boundPos.left >= 0 &&
+    boundPos.right <=
+      (window.innerWidth || document.documentElement.clientWidth) &&
+    boundPos.bottom <=
+      (window.innerHeight || document.documentElement.clientHeight)
+  );
+};
+```
+
+using `elem.getBoundingClientRect();` we can get element position (left,top,right,bottom), with that we can find element is in view or not
+
+```js
+const getBlocks = () => {
+  let res = [];
+  let allBlocks = document.getElementsByClassName("blocks");
+
+  for (let elem of allBlocks) {
+    if (inViewPost(elem)) {
+      res.push(elem.innerText);
+    }
+  }
+  console.log(res);
+};
+// getBlocks(); when calling this function we fill get => all elements(".blocks") which are in viewport
+```
+
+By calling getBlocks() function we can get all elements in the viewport
+
+### Debounce function call on window scroll
+
+```js
+// debounce scroll function
+const debounceFn = (func, delay) => {
+  // gets function & delay
+  let timeOutId;
+
+  return function () {
+    let context = this; // this will not be available in setTimeout, only global scope is available in setTimeout
+    let args = arguments;
+    clearTimeout(timeOutId);
+
+    timeOutId = setTimeout(() => func.apply(context, arguments), delay);
+  };
+};
+```
+
+above **debounceFn()** is a standard debounce function
+
+we have to pass out **getBlocks()** with delay to debounceFn function
+
+```js
+// add debounce fnction to window scroll
+window.addEventListener("scroll", debounceFn(getBlocks, 3000));
+```
+
+## Whole Code below
+
+```js
+/*
+    when user scrolls down, when he pause scrolling then we have to find which elems are in the viewport
+    we have to store it in the array so we can use it later
+*/
+
+/*
+    we have to perform 2 operation
+    1. debounce scroll function
+    2. find elems are in viewport
+*/
+
+//find elems are in viewport
+
+// to find elem in viewport or not we have to check
+// elem.left >= 0 , elem.top >=0 , elem.right < window.innerWidth , elem.bottom < window.innerHeight
+const inViewPost = (elem) => {
+  let boundPos = elem.getBoundingClientRect(); // will get top,left,right,bottom postions on the element
+
+  return (
+    boundPos.top >= 0 &&
+    boundPos.left >= 0 &&
+    boundPos.right <=
+      (window.innerWidth || document.documentElement.clientWidth) &&
+    boundPos.bottom <=
+      (window.innerHeight || document.documentElement.clientHeight)
+  );
+};
+
+// now we got the function to find elem is in viewport or not
+
+const getBlocks = () => {
+  let res = [];
+  let allBlocks = document.getElementsByClassName("blocks");
+
+  for (let elem of allBlocks) {
+    if (inViewPost(elem)) {
+      res.push(elem.innerText);
+    }
+  }
+  console.log(res);
+};
+// getBlocks(); when calling this function we fill get => all elements(".blocks") which are in viewport
+
+// debounce scroll function
+const debounceFn = (func, delay) => {
+  // gets function & delay
+  let timeOutId;
+
+  return function () {
+    let context = this; // this will not be available in setTimeout, only global scope is available in setTimeout
+    let args = arguments;
+    clearTimeout(timeOutId);
+
+    timeOutId = setTimeout(() => func.apply(context, arguments), delay);
+  };
+};
+
+// add debounce fnction to window scroll
+window.addEventListener("scroll", debounceFn(getBlocks, 3000));
+```
