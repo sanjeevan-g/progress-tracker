@@ -1,0 +1,213 @@
+---
+title: "Create guided tour for website in JavaScript"
+publishedAt: "2023-12-12"
+updatedAt: "2023-12-12"
+tags:
+  - JavaScript
+  - Design
+---
+
+## What are we going to build?
+
+This is similar to the IntroJS library that takes an array of steps with the element and the information to be displayed and walk-through first-time users through the website
+
+## How are we going to build?
+
+we first create HTML template iwith grid elements with unique ID
+
+```html
+<style>
+    .section {
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: yellow;
+        margin-bottom: 5px;
+        font-size: 25px;
+    }
+
+    #wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .block {
+        flex: 0 350px;
+        width: 350px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 100px;
+        background: red;
+        margin: 5px;
+        font-size: 40px;
+        color: #000;
+    }
+</style>
+</head>
+
+<body>
+<div id="container">
+    <header id="header" class="section"> Header </header>
+    <div id="wrapper">
+        <div id="1" class="block">1</div>
+        <div id="2" class="block">2</div>
+        <div id="3" class="block">3</div>
+        <div id="4" class="block">4</div>
+        <div id="5" class="block">5</div>
+        <div id="6" class="block">6</div>
+        <div id="7" class="block">7</div>
+        <div id="8" class="block">8</div>
+        <div id="9" class="block">9</div>
+        <div id="10" class="block">10</div>
+        <div id="11" class="block">11</div>
+        <div id="12" class="block">12</div>
+        <div id="13" class="block">13</div>
+        <div id="14" class="block">14</div>
+        <div id="15" class="block">15</div>
+        <div id="16" class="block">16</div>
+        <div id="17" class="block">17</div>
+        <div id="18" class="block">18</div>
+        <div id="19" class="block">19</div>
+        <div id="20" class="block">20</div>
+        <div id="21" class="block">21</div>
+        <div id="22" class="block">22</div>
+        <div id="23" class="block">23</div>
+        <div id="24" class="block">24</div>
+    </div>
+    <footer id="footer" class="section"> Footer </footer>
+```
+
+whole js code
+```js
+<script>
+/*
+we are going to create guided tour similar to introJs
+we will provide set of ID'S then we will highlight those ID's
+*/
+
+/*
+things required =>
+1. hightlight the section
+2. create a popover with "next" and "prev" buttons to move between the steps
+3. scroll to the elem if it is not in the viewport
+*/
+
+const borderWidth = 4;
+const popoverWidth = 100;
+const popoverHeight = 100;
+
+const steps = ["header", "8", "12", "footer", "5"];
+let index = 0;
+
+const highlight = (id) => {
+
+    // remove the existing highlighted elements
+    document.getElementById("highlight-bg")?.remove();
+    document.getElementById("popover-block")?.remove();
+
+    // get element by id
+    let elem = document.getElementById(id);
+
+    // scroll to the elem first
+    scrollTo(elem);
+
+    // get element Dimension
+    let elemDimension = elem.getBoundingClientRect();
+
+    // highlight the element
+    highlightElement(elemDimension)
+    popover(elemDimension)
+}
+
+const highlightElement = (elemDimension) => {
+    // we will create position:absolute div elem and place it top of the element
+
+    // we are adding window.scrollY because gerBoundingClientRect() is relative to viewPort
+    // it will not worl properly if we scrolls 
+    // we need overall top value
+    const top = elemDimension.top + window.scrollY;
+    const left = elemDimension.left + window.scrollX;
+    const height = elemDimension.height;
+    const width = elemDimension.width;
+
+    const elm = document.createElement('div');
+    elm.style = `
+    position: absolute;
+    top: ${top - borderWidth}px;
+    left: ${left - borderWidth}px;
+    width: ${width}px;
+    height: ${height}px;
+    transition: border linear 0.2s;
+    `;
+
+    elm.id = "highlight-bg";
+    document.getElementById("wrapper").appendChild(elm);
+
+    //will add border using setTimeout to show transition
+    setTimeout(() => elm.style.border = `${borderWidth}px solid #ccc`, 0)
+}
+
+// create popover div
+const popover = (elemDimension) => {
+
+    let top = elemDimension.bottom + window.scrollY; // we are placing the popover at the bottom of the element
+    let left = elemDimension.left + window.scrollX;
+    let right = elemDimension.right; // for placing the element at middle
+
+    let elm = document.createElement("div");
+
+    elm.style = `
+    position: absolute;
+    top: ${top + 5}px;
+    left: ${(left + right) / 2 - (popoverWidth / 2)}px;
+    width: ${popoverWidth}px;
+    height: ${popoverHeight}px;
+    background-color: #fff;
+    `;
+
+    elm.id = "popover-block";
+
+    elm.appendChild(navigation());
+
+    document.getElementById("wrapper").appendChild(elm);
+}
+
+const navigation = () => {
+
+    const nextButton = document.createElement("button");
+    nextButton.textContent = "next";
+    nextButton.addEventListener('click', () => {
+        if (index < steps.length - 1) highlight(steps[++index])
+    })
+
+    const prevButton = document.createElement("button");
+    prevButton.textContent = "prev";
+
+    prevButton.addEventListener('click', () => {
+        if (index > 0) highlight(steps[--index])
+    })
+
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(prevButton)
+    fragment.appendChild(nextButton)
+
+    return fragment;
+}
+
+const scrollTo = (elem) => {
+    let top = elem.offsetTop;
+
+    window.scrollTo({ top: top, behavior: "smooth" })
+}
+
+highlight(steps[index]);
+</script>
+```
+
+**need to do**
+1. proper UI
+2. popover always placed at the bottom, it has to be dynamic
