@@ -127,7 +127,7 @@ const highlightElement = (elemDimension) => {
     // we will create position:absolute div elem and place it top of the element
 
     // we are adding window.scrollY because gerBoundingClientRect() is relative to viewPort
-    // it will not worl properly if we scrolls 
+    // it will not work properly if we scrolls 
     // we need overall top value
     const top = elemDimension.top + window.scrollY;
     const left = elemDimension.left + window.scrollX;

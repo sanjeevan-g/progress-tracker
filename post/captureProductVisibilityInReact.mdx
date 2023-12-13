@@ -1,0 +1,123 @@
+---
+title: "Capture Element in the view for given Time Frame using IntersectionObserver -React "
+publishedAt: "2023-12-13"
+updatedAt: "2023-12-13"
+tags:
+  - React
+  - IntersectionObserver
+  - Coding
+  - CustomHook
+---
+
+**This solution is a continuation of the our previous solution using JS**
+
+in this we will solve using `IntersectionObserver` in react
+
+first we will create `20 block` elements and add it to **App component**
+
+```jsx
+const Block = ({ index }) => {
+  return (
+    <div className={style.block} key={index}>
+      {index}
+    </div>
+  );
+};
+
+function App() {
+  // lets create 20 Blocks element to form a grid
+
+  let blocks = [];
+
+  for (let i = 0; i < 20; i++) {
+    blocks.push(<Block index={i + 1} key={i + 1} />);
+  }
+  return <div className={style.wrapper}>{blocks}</div>;
+}
+```
+
+we will create customHook to handle element visisblity
+
+```js
+// this is an custom hook
+// it returns whether the elem is in the view or not
+
+import { useEffect, useState } from "react";
+
+export default function useInView(ref) {
+  const [inview, setInview] = useState(false);
+
+  // the callback function gets entry as arguments, which is an array
+  // entry is array of length 1 so we destructured it
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      setInview(entry.isIntersecting);
+    },
+    { threshold: 1.0 }
+  );
+
+  useEffect(() => {
+    observer.observe(ref.current);
+
+    return () => observer.unobserve(ref.current);
+  }, []); // run the callback after page is mounted
+  return inview;
+}
+```
+
+explaination of above code:
+
+- use state to handle element view details, initially false
+- create [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) object
+- add **callback Fn** and **threshold** options to the observer
+- **threshold: 1.0** => 100% inside the viewport
+- in useEffect add the observer to the ref we received as props
+- **useEffect runs after page mount** so in useEffect we will get DOM element ref
+- cleanUp the observer on destroy using **observer.unobserve()**
+
+### Block Element
+
+now update the Block element
+
+```jsx
+const delay = 3000;
+
+const Block = ({ index }) => {
+  const ref = useRef(null); // create ref to reference the block element
+
+  let inview = useInView(ref); // passing the ref of DOM element, gets elem in view or not
+
+  // now lets add debounce here
+  // if element is out of view before delay, then clear timeout else console the index
+
+  // we will log the index of new Element that comes into view and stays for >= delay time
+  useEffect(() => {
+    let timeOutId = null;
+    if (inview) {
+      timeOutId = setTimeout(() => {
+        console.log(index);
+      }, delay);
+    }
+
+    return () => clearTimeout(timeOutId);
+  }, [inview, index]);
+
+  return (
+    <div ref={ref} className={style.block} key={index}>
+      {index}
+    </div>
+  );
+};
+```
+
+explaination of above code:
+
+- create 3seconds delay variable
+- create ref using useRef
+- add ref to div block
+- pass this ref to **useInView(ref)** custom hook
+- custom hook will return the boolean value of element visisblity
+- create useEffect with **inview** as dependency
+- if **inview** value changes we run this useEffect
+- we will log the element index using **setTimeout** with given delay
+- if **inview** value changes before the delay, the clear the timeout using **cleanUpFunction()**
