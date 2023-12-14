@@ -15,7 +15,17 @@ const config: Config = {
         accentDark: "#ffdb4d",
         gray: "#747474",
       },
-
+      typography: {
+        DEFAULT: {
+          css : {
+            code: {
+              '&:not(&:has(span))' : {
+                fontSize: '18px'
+              }
+            }
+          }
+        }
+      }
     },
   },
   plugins: [

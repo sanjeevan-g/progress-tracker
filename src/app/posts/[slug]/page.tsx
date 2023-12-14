@@ -57,7 +57,7 @@ export default function Page({ params }: Params) {
             </ul>
         }
 
-        <div className="prose prose-neutral dark:prose-invert mt-10">
+        <div className="prose prose-neutral dark:prose-invert mt-10 prose-code:after:hidden prose-code:before:hidden">
             <MDXContent />
         </div>
 
