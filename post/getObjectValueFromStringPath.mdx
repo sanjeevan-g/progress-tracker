@@ -1,0 +1,83 @@
+---
+title: "Implement function that gets object and string path as parameters and return corresponding object value"
+publishedAt: "2023-12-15"
+updatedAt: "2023-12-15"
+tags:
+  - Javascript
+  - Polyfill
+  - lodash__get()
+  - Coding
+---
+
+Implement a function that will take an object and a `string or array of strings` as a path and return the value at that path.
+If nothing is found return undefined. Polyfill for lodash.\_get().
+
+## initial JS Setup
+
+```js
+// Input:
+const obj = {
+  a: {
+    b: {
+      c: [1, 2, 3],
+    },
+  },
+};
+
+console.log(get(obj, "a.b.c"));
+console.log(get(obj, "a.b.c.0"));
+console.log(get(obj, "a.b.c[1]"));
+console.log(get(obj, "a.b.c[3]"));
+
+// Output:
+// [1,2,3]
+// 1
+// 2
+// undefined
+```
+steps in Implementing get function
+1. convert the string path to array of strings as keys[] by removing the ".","[","]" characters
+2. then find the respective the value based on ksys[]
+3. we use reduce method to find the value
+
+```js
+/*
+function accept 2 parameters object and sting||array of strings
+we have to return value of the string path
+Like a pollyfill for lodash__get()
+*/
+
+const obj = {
+    a: {
+        b: {
+            c: [1, 2, 3]
+        }
+    }
+};
+
+console.log(get(obj, 'a.b.c'));
+console.log(get(obj, 'a.b.c.0'));
+console.log(get(obj, 'a.b.c[1]'));
+console.log(get(obj, 'a.b.c[3]'));
+
+
+// Output:
+// [1,2,3]
+// 1
+// 2
+// undefined
+
+function get( obj , path ) {
+    // base case
+    // empty string or empty array
+    if( !path || path.length == 0 ) return undefined;
+
+    // if path is a string, then we will split it into array
+    if(typeof path === "string") {
+        path = path.split(/[.[\]]/).filter(str => str != ""); 
+        // we will split array based on '. [ ]', we will remove empty strings
+    }
+
+    return path.reduce( ( obj, key ) => { return obj[key] } , obj )
+}
+```
