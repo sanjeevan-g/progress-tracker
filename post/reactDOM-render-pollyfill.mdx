@@ -1,0 +1,90 @@
+---
+title: "Pollyfill for reactDOM.render(), convert JSON data to HTML using JS"
+publishedAt: "2023-12-16"
+updatedAt: "2023-12-16"
+tags:
+  - Javascript
+  - pollyfill
+  - coding
+---
+
+create a pollyfill for reactDOM.render()
+
+given JSON data
+
+```js
+const json = {
+  type: "div",
+  props: { id: "hello", class: "foo" },
+  children: [
+    { type: "h1", children: "HELLO" },
+    {
+      type: "p",
+      children: [{ type: "span", props: { class: "bar" }, children: "World" }],
+    },
+  ],
+};
+```
+
+from the above json data,
+
+- object has 3 properties
+- type
+  - HTML tag name
+- props
+  - properties of the DOM element like `id` and `className`
+- children
+  - can be a string or an array
+  - if it is a `string` then it is `textcontent` for the DOM element
+  - if it is a `array` then it is array of new DOM elements
+
+```js
+const generateDOM = (root, domObj) => {
+  const helper = (obj) => {
+    const { type, props, children } = obj;
+    // create a new DOM element using type
+    let elm = document.createElement(type);
+
+    // add properties to the DOM element
+    if (props) {
+      // if properties exist
+      for (let property in props) {
+        elem[property] = props[property];
+      }
+    }
+
+    // now recursively generate children
+    let fragement = document.createDocumentFragment();
+
+    if (typeof children === "string") {
+      el.innerText = children;
+    } else {
+      for (let child of children) {
+        let childEl = helper(child);
+        fragment.appendChild(childEl);
+      }
+    }
+    elm.appendChild(fragement);
+
+    return elm;
+  };
+  let domElem = helper(domObj);
+
+  root.appendChild(domElem);
+};
+
+let root = document.getElementById("root");
+
+generateHtml(root, domObj);
+```
+
+we will create a function `generateDOM` that accepts `root` and `domObj` 
+and append the generated DOM to the root element
+
+it will create a DOM element first using type property
+then add properties if props exist
+
+then check the children, if it is string then append it as textNode
+else recursively generate DOM elements and append it to the current element
+
+we use [Document fragement](https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment) to append child elements to the current element

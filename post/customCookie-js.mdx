@@ -38,5 +38,83 @@ method with set and get properties
 3. using `set()` property get the cookie string and parse the string to get key,value and options
 4. from options object get the expires time
 5. if max-age is not present then set expires time to `Infinity`
-6. in `get()` property iterate the cookieStore Map, if `expires \<= Date.now()` then delete that cookie
+6. in `get()` property iterate the cookieStore Map, if `expires <= Date.now()` then delete that cookie
 7. return remaining cookies by joining them as string `.join("; ")`
+
+```js
+ <script>
+/*
+we have to create Custome Cookie in document object
+it has to store key=value pair with "max-age" option
+*/
+
+let cookieStore = new Map(); // to hold the cookie value
+
+function createCustomCookie() {
+    Object.defineProperty(document, "myCookie", {
+        configurable: true,
+        set(val) {
+            // val we get wiil be like "name=sanjeevan;max-age=1" or "name=sanju"
+            // name is the key and sanjeevan is the value, max-age is the max-age option for this cookie
+
+            let { key, value, options } = parseCookieString(val);
+
+            // now determine the expire using max-age option
+
+            let expire = Infinity; // if max-age is not set
+
+            if( options["max-age"] ) {
+                expire = Date.now() + (options["max-age"] * 1000)
+            }
+
+            cookieStore.set(key , { value , expire });
+
+        },
+        get() {
+            let cookieArray = [];
+
+            for( let [key , { value , expire}] of cookieStore ) {
+                if( expire <= Date.now() ) { // cookie expired
+                    cookieStore.delete(key);
+                }else {
+                    cookieArray.push( `${key}=${value}`);
+                }
+            }
+
+            return cookieArray.join("; ");
+        }
+    })
+}
+
+function parseCookieString(str) {
+    let [nameValue, ...rest] = str.split(";") // we seprate nameValue and options
+
+    let [key , value] = splitKeyValue(nameValue);
+
+    let options = {};
+
+    for(let option of rest) {
+        let [optionKey , optionValue] = splitKeyValue(option);
+        options[optionKey] = optionValue;
+    }
+    return {
+        key,
+        value,
+        options
+    }
+}
+
+const splitKeyValue = ( str ) => {
+    // split by "="
+    return str.split("=").map( s => s.trim() );
+}
+
+// run the function createCustomCookie to append the myCookie in document object
+createCustomCookie();
+document.myCookie = "name=sanjeevan;max-age=1";
+document.myCookie = "blog=progress-tracker;";
+console.log(document.myCookie); // name=sanjeevan; blog=progress-tracker
+
+setTimeout( () => {console.log(document.myCookie)} , 1500 ); // blog=progress-tracker
+</script>
+```
