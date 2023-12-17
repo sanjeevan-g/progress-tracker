@@ -1,0 +1,107 @@
+---
+title: "Implement function that sets given value to the object using the string path"
+publishedAt: "2023-12-17"
+updatedAt: "2023-12-17"
+tags:
+  - Javascript
+  - Polyfill
+  - lodash__set()
+  - Coding
+---
+
+write a function `setObj` that gets object, path and value, set or update the object using the string path
+polyfill for lodash.\_\_set().
+
+## initial JS Setup
+
+```js
+let obj = { a: [{ b: { c: 3 } }] };
+
+setObj(obj, "a[0].b.c.", 4);
+console.log(obj.a[0].b.c.d);
+// 4
+
+setObj(obj, ["x", "0", "y", "z"], 5);
+console.log(obj.x[0].y.z);
+// 5
+
+console.log(obj);
+```
+
+## steps
+
+1. path could be string or array of strings, so convert to string array if it is a string
+2. remove characters like '.','[' , ']' from the string path
+3. create helper function that accepts object, pathArray and current Index
+4. if we reached the end of the pathArr then set the value to the obj
+5. else determine whether to set obj or array to current key
+6. if current key => number ? [] : {};
+7. then recursively call the helper function with updated object, and index+1
+8. if `obj[key] exist then pass the same reference`, no need to create new object | array.
+
+## final code
+
+```js
+const setObj = (obj, path, value) => {
+  // convert string path to arr
+
+  let pathArr = path;
+
+  if (typeof pathArr === "string") {
+    pathArr = pathArr.replaceAll("[", ".").replaceAll("]", "").split(".");
+  }
+  // now we got the path array
+  // now recursively convert path into object
+
+  const helper = (obj, pathArr, index) => {
+    let key = pathArr[index];
+    if (index === pathArr.length - 1) {
+      // set the value
+      obj[key] = value;
+      return obj;
+    }
+
+    // check if the key is already exist or not
+    // key not exist or only primitive is there
+    let isNotNum = isNaN(parseInt(pathArr[index + 1]));
+    if (!obj[key] || typeof obj[key] !== "object") {
+      // we are assigning either new object or new arr
+      obj[key] = helper(isNotNum ? {} : [], pathArr, index + 1);
+    } else {
+      // pass the existing object
+      helper(obj[key], pathArr, index + 1);
+    }
+    return obj;
+  };
+
+  helper(obj, pathArr, 0);
+};
+
+let obj = { a: [{ b: { c: 3 } }] };
+
+setObj(obj, "a[0].b.c", 4);
+console.log(obj.a[0].b.c);
+// 4
+
+setObj(obj, ["x", "0", "y", "z"], 5);
+console.log(obj.x[0].y.z);
+// 5
+
+console.log(obj);
+// {
+//     "a": [
+//         {
+//             "b": {
+//                 "c": "4"
+//             }
+//         }
+//     ],
+//     "x": [
+//         {
+//             "y": {
+//                 "z": 5
+//             }
+//         }
+//     ]
+// }
+```
