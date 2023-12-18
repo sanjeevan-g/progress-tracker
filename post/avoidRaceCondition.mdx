@@ -1,0 +1,87 @@
+---
+title: "Avoid Race conditions in react using useEffect"
+publishedAt: "2023-12-18"
+updatedAt: "2023-12-18"
+tags:
+  - React
+  - useEffect
+  - AbortController
+  - Coding
+---
+
+## Race conditions in react
+
+A race condition is a phenomenon in which if you are making multiple API calls or performing asynchronous operations, then there are chance that the UI can update/render in glitch as the later call may resolve first and the first API call may resolve later.
+
+it may cause data leak issues
+
+**Common issues** calling api calls based on id|key, if id value changes before the async call resolved, then the previous async call will try to update the state with wrong date
+we can easily find this issue in `dataFetching` in useEffect in `strict mode`
+
+## 2 ways to handle race condition
+
+1. using `Flags` inside useEffect and `update` the flag when comp `unmount or dependency changes`
+2. using [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) inside useEffect
+
+we will see how to use Flags inside the useEffect
+
+```jsx
+import { useEffect, useState } from "react";
+
+let inputStyle = {
+  with: "100%",
+  minHeight: "40px",
+  padding: "10px",
+};
+
+const getRandomTime = () => Math.floor(Math.random() * 3000);
+
+function getRandomData(data) {
+  return new Promise((res) => {
+    const time = getRandomTime();
+    setTimeout(() => {
+      res(data);
+    }, time);
+  });
+}
+
+export default function AvoidRace() {
+  const [searchValue, setSearchValue] = useState("");
+
+  const [result, setResult] = useState("");
+
+  function updateSearch(e) {
+    let { value } = e.target;
+    setSearchValue(value);
+
+    // generate random data or getting api call here will cause a race condition
+    // getRandomData(searchValue).then( data => setResult(data));
+  }
+
+  // to avoid race condition use useEffect
+  useEffect(() => {
+    let flag = true;
+
+    getRandomData(searchValue).then((data) => {
+      if (flag) {
+        setResult(data);
+      }
+    });
+    return () => {
+      flag = false;
+    };
+  }, [searchValue]);
+  return (
+    <>
+      <input
+        type="text"
+        style={inputStyle}
+        placeholder="search"
+        value={searchValue}
+        onChange={updateSearch}
+      />
+      <p>{result}</p>
+    </>
+  );
+}
+```
