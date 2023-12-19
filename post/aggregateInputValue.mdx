@@ -1,0 +1,79 @@
+---
+title: "Aggregate Input values into a single object"
+publishedAt: "2023-12-19"
+updatedAt: "2023-12-19"
+tags:
+  - Javascript
+  - Coding
+---
+
+we are given a `form` element with multiple input fields, we have to store the input values in a single object based on input field names
+
+`input field names` consist of `Object Path`
+
+## Html Setup
+
+```html
+<form id="parent">
+  <input type="text" name="a.c" value="1" />
+  <input type="text" name="a.b.d" value="2" />
+  <input type="text" name="a.b.e" value="3" />
+</form>
+```
+
+## steps
+
+1. get the parent form field
+2. get all the input fields from the parent using `querySelectorAll()`
+3. create a Object `output` which will contain our final output
+4. iterate through the input fields
+   - process the name to `pathArr` using split
+   - iterate the pathArr, check we have the keys in the output, if not add the key to the output object
+   - finally add the value, when we reach the end of pathArr
+
+```js
+/*
+    we will be given a form with multiple inputs
+    we have to store these inputs in a object based on input name like a tree
+    name => "a.c" => a : { c: "value" }
+*/
+// get the parent form first
+let parent = document.getElementById("parent");
+
+// get the inputs
+let inputs = parent.querySelectorAll("input");
+
+let output = {};
+
+inputs.forEach((input) => {
+  let { name, value } = input;
+
+  // process the name
+  let pathArr = name.split(".");
+
+  let tempObj = output;
+  pathArr.forEach((key, index) => {
+    if (!Object.hasOwn(tempObj, key)) {
+      tempObj[key] = {};
+    }
+
+    // check whether we reached the end of the path
+    if (index === pathArr.length - 1) {
+      tempObj[key] = value; // overwrite existing value
+    }
+
+    tempObj = tempObj[key];
+  });
+});
+
+console.log(output);
+//{
+//     "a": {
+//         "c": "1",
+//         "b": {
+//             "d": "2",
+//             "e": "3"
+//         }
+//     }
+// }
+```
