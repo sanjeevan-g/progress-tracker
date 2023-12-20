@@ -1,0 +1,56 @@
+---
+title: "Piping in JavaScript"
+publishedAt: "2023-12-20"
+updatedAt: "2023-12-20"
+tags:
+  - Javascript
+  - Coding
+  - PolyFill
+---
+
+## Pipe in Javascript
+
+The concept of pipe is simple — it combines n functions. It's a pipe flowing left-to-right, calling each function with the output of the last one.
+
+it helps us to combine n functions and get the output
+
+## Inital Code
+
+```js
+const val = { salary: 10000 };
+
+const getSalary = (person) => person.salary;
+const addBonus = (netSalary) => netSalary + 1000;
+const deductTax = (grossSalary) => grossSalary - grossSalary * 0.3;
+
+let result = pipe(getSalary, addBonus, deductTax)(val);
+console.log(result); // 7700
+```
+
+if we see here, pipe function gets functions as input and `return another function` that returned function receives the initial value, and return `actual result`.
+
+```js
+/*
+    pipe() => accepts functions and initial props
+    execute the functions from left to right then return the last result
+    next function gets the result of previous function
+ */
+
+const val = { salary: 10000 };
+
+const getSalary = (person) => person.salary;
+const addBonus = (netSalary) => netSalary + 1000;
+const deductTax = (grossSalary) => grossSalary - grossSalary * 0.3;
+
+const pipe = (...args) => {
+  return (initVal) => {
+    for (let fn of args) {
+      initVal = fn(initVal);
+    }
+
+    return initVal;
+  };
+};
+let result = pipe(getSalary, addBonus, deductTax)(val);
+console.log(result); // 7700
+```
