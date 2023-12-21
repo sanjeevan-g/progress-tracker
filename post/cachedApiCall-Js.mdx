@@ -1,0 +1,93 @@
+---
+title: "Cached API call with expiry time"
+publishedAt: "2023-12-21"
+updatedAt: "2023-12-21"
+tags:
+  - Javascript
+  - Coding
+  - Caching
+---
+
+we have to create a function that `accepts expiry duration` and returns `another funtion` which will give the fetched data
+
+## Initial Setup
+
+```js
+let call = cachedApiCall(1500);
+call("https://jsonplaceholder.typicode.com/todos/1", {}).then((a) =>
+  console.log(a)
+);
+
+setTimeout(() => {
+  call("https://jsonplaceholder.typicode.com/todos/1", {}).then((a) =>
+    console.log(a)
+  );
+}, 700);
+setTimeout(() => {
+  call("https://jsonplaceholder.typicode.com/todos/1", {}).then((a) =>
+    console.log(a)
+  );
+}, 1600);
+```
+
+create a function `cachedApiCall(duration)` that accepts max api span time
+return a async function, from that we get our result
+
+## steps
+
+- create a `Map() | {}` to store the `fetch result and expiry time` based on key
+- key => addtion of `apiURL + config`
+- on execution check if we have key exist or curTime > expiry time then
+  - fetch new Data and calc new expiry time and store it in Map
+- return the value from the map.
+
+```js
+const cachedApiCall = (time) => {
+  let map = new Map();
+
+  return async (apiUrl, config = {}) => {
+    let key = `${apiUrl}-${JSON.stringify(console)}`;
+
+    // either no key or value is expired
+    if (!map.has(key) || Date.now() > map.get(key).expiry) {
+      // make a fresh api call
+      console.log("make api call");
+      try {
+        let resp = await fetch(apiUrl, config);
+        let data = await resp.json();
+
+        map.set(key, { value: data, expiry: Date.now() + time });
+      } catch (e) {
+        console.log("error while fetching the data", e);
+      }
+    }
+
+    return map.get(key).value;
+  };
+};
+
+let call = cachedApiCall(1500);
+call("https://jsonplaceholder.typicode.com/todos/1", {}).then((a) =>
+  console.log(a)
+);
+
+setTimeout(() => {
+  call("https://jsonplaceholder.typicode.com/todos/1", {}).then((a) =>
+    console.log(a)
+  );
+}, 700);
+setTimeout(() => {
+  call("https://jsonplaceholder.typicode.com/todos/1", {}).then((a) =>
+    console.log(a)
+  );
+}, 1600);
+
+/*
+ouput: 
+make api call
+response...
+response...
+make api call
+response...
+*/
+```
