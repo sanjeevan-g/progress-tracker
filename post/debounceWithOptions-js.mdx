@@ -1,0 +1,69 @@
+---
+title: "debounce with options in JS"
+publishedAt: "2023-12-22"
+updatedAt: "2023-12-22"
+tags:
+  - Javascript
+  - Coding
+  - debounce
+  - leading / trailing
+---
+
+This is the follow up question of `debounce` in js, with options
+
+options:
+
+- leading: true => invoke the function at the `beginning(first)` of the addEventListener
+- trailing: true => invoke the function at the `end`, `same as normal debounce`
+- if both true => invoke at both first and at last
+
+## Initial Setup
+
+```js
+<input type="search" id="search" placeholder="Enter your query" />;
+
+const onChange = (e) => {
+  console.log(e.target.value);
+};
+
+const debouncedSearch = debounce(onChange, 1000);
+
+const input = document.getElementById("search");
+input.addEventListener("keyup", debouncedSearch);
+```
+
+## Final code
+
+```js
+const debounce = (fn, delay, option = { leading: true, trailing: true }) => {
+  let timer;
+
+  // debounce retunrs another function
+  return function (...args) {
+    let isLeadingInvoked = false;
+    // using isLeadingInvoked we can avoid firing the fnction fn twice at the start (leading true )
+    // and at the end (trailing true )
+
+    // store the context of the function
+    let context = this;
+
+    clearTimeout(timer); // clear timer if present
+
+    if (!timer && option.leading) {
+      // leading: true and not prevSetTimeout present
+      fn.apply(context, args);
+      isLeadingInvoked = true; // set to true
+    }
+
+    timer = setTimeout(() => {
+      if (option.trailing && !isLeadingInvoked) {
+        fn.apply(context, args);
+      }
+      timer = null;
+    }, delay);
+
+    // we have to call the setTimout all the time
+    // because it helps to avoid involking fn not after first time if leading is true
+  };
+};
+```

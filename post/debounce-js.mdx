@@ -1,0 +1,54 @@
+---
+title: "simple debounce in JS"
+publishedAt: "2023-12-22"
+updatedAt: "2023-12-22"
+tags:
+  - Javascript
+  - Coding
+  - debounce
+---
+
+we have create a dobounce function that accepts calback and delay
+
+## Initial Setup
+
+```js
+<input type="search" id="search" placeholder="Enter your query" />;
+
+const onChange = (e) => {
+  console.log(e.target.value);
+};
+
+const debouncedSearch = debounce(onChange, 1000);
+
+const input = document.getElementById("search");
+input.addEventListener("keyup", debouncedSearch);
+```
+
+steps:
+
+1. `debounce(fn , delay) => fn()`debounce function should accepts calback and delay and returns a function
+2. declare `timer` variable to hold setTimeOut id
+3. store the context of the function in a variable, because `this` will refer to global context
+4. on function invoke
+   - clear previous timers
+   - call the calback with context and arguments
+
+## full code
+
+```js
+const debounce = (fn, delay) => {
+  // return another function
+  let timer; // init timer to hold setTimeout id
+  return function (...args) {
+    // to have delay we need setTimeout
+
+    // store the context of the function
+    let context = this;
+    clearTimeout(timer); // on next function call, clear the previous setTimeout
+    timer = setTimeout(() => {
+      fn.apply(context, args);
+    }, delay);
+  };
+};
+```
