@@ -7,7 +7,12 @@ tags:
   - Notes
 ---
 
-## Functional Components 
+## Functional Components
+
 1. function `name` starts with `Caps` and need to return `null || markup (JSX)`
 2. each function should return only one element i.e one parent element only, we can use `<></>` to wrap more elements
 3. `Not to` declare new Functional Component inside another Functional Component.
+
+## Function as reference
+
+1. on rerender new function reference is created for all functions, so if we passing the function as props then we have to cache it before passing for performance reasons

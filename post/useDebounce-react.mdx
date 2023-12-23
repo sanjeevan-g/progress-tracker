@@ -1,0 +1,72 @@
+---
+title: "useDebounce hook in react"
+publishedAt: "2023-12-23"
+updatedAt: "2023-12-23"
+tags:
+  - React
+  - debounce
+  - custom hook
+---
+
+we have to create custom hook that accepts the callback with delay and return the debounced function
+
+```jsx
+export default function Debounce() {
+  let [search, setSearch] = useState("");
+
+  // we have to debounce this onChange function
+  // we will use custom hook for this
+
+  // we have used useCallback
+  const onChange = useCallback((e) => {
+    console.log(e.target.value);
+    setSearch(e.target.value);
+  }, []);
+
+  const debouncedSearch = useDebounce(onChange, 1000);
+
+  return (
+    <>
+      <h2> Day 43- useDebounce in react </h2>
+      <input
+        placeholder="search.."
+        style={{ height: "30px" }}
+        type="text"
+        onChange={debouncedSearch}
+      />
+      <p>{search}</p>
+    </>
+  );
+}
+```
+
+we have used `useState()` to check how custom hook works on state updates and on rerenders.
+
+```js
+import { useCallback, useRef } from "react";
+
+export default function useDebounce(fn, delay) {
+  const timeout = useRef(null);
+
+  const debounce = useCallback(
+    function (...args) {
+      const context = this;
+
+      clearTimeout(timeout.current);
+
+      timeout.current = setTimeout(() => {
+        fn.apply(context, args);
+      }, delay);
+    },
+    [fn, delay]
+  );
+
+  return debounce;
+}
+```
+
+we have used useCallback in both custome hook and onChange also
+
+## Note:
+
+on rerender new function reference is created for all functions, so if we passing the function as props then we have to cache it before passing for performance reasons
