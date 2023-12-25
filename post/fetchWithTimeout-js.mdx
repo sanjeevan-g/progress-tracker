@@ -1,0 +1,59 @@
+---
+title: "fetch with Timeout in js"
+publishedAt: "2023-12-25"
+updatedAt: "2023-12-25"
+tags:
+  - Javascript
+  - Coding
+  - AbortController
+---
+
+we have to create function `fetchWithTimeout(url, duration)` which accepts fetch url and timeout duration
+we have cancel the fetch request if it's not resolved within the given duration
+
+## Initial Setup
+
+```js
+fetchWithTimeout("https://jsonplaceholder.typicode.com/todos/1", 100)
+  .then((res) => {
+    console.log(res);
+  })
+  .catch((e) => console.log("error in fetch", e));
+
+/*
+    error when fetch excced the duration
+    Aborting the fetch
+    index.html:46 error in fetch DOMException: The user aborted a request.
+*/
+```
+
+## output
+
+```js
+const fetchWithTimeout = (url, duration) => {
+  return new Promise((resolve, reject) => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    let timerid = null;
+
+    fetch(url, { signal })
+      .then((res) => res.json())
+      .then((data) => {
+        clearTimeout(timerid);
+        resolve(data);
+      })
+      .catch((e) => {
+        reject(e);
+      });
+    timerid = setTimeout(() => {
+      console.log("Aborting the fetch");
+      controller.abort();
+    }, duration);
+  });
+};
+```
+
+in our solution we will use [AbortController()](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) method to cancel the fetch
+
+will create a setTimeout function with given duration to abort the fetch request.
+if we fetched the request and converted to json `resp.json()` then clearTimeout.
