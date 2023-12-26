@@ -1,0 +1,140 @@
+---
+title: "Auto Suggestion on input field in React"
+publishedAt: "2023-12-26"
+updatedAt: "2023-12-26"
+tags:
+  - Javascript
+  - React
+  - Coding
+  - auto suggestion
+  - machine coding
+---
+
+this is similar to our previous post, but we have to implement using react
+
+## full code
+
+```jsx
+import { useEffect, useRef, useState } from "react";
+import "./autosuggestion.css";
+
+// Mock Server
+const FAILURE_COUNT = 10;
+const LATENCY = 200;
+
+function getRandomBool(n) {
+  const threshold = 1000;
+  if (n > threshold) n = threshold;
+  return Math.floor(Math.random() * threshold) % n === 0;
+}
+
+function getSuggestions(text) {
+  var pre = "pre";
+  var post = "post";
+  var results = [];
+  if (getRandomBool(2)) {
+    results.push(pre + text);
+  }
+  if (getRandomBool(2)) {
+    results.push(text);
+  }
+  if (getRandomBool(2)) {
+    results.push(text + post);
+  }
+  if (getRandomBool(2)) {
+    results.push(pre + text + post);
+  }
+  return new Promise((resolve, reject) => {
+    const randomTimeout = Math.random() * LATENCY;
+    setTimeout(() => {
+      if (getRandomBool(FAILURE_COUNT)) {
+        reject();
+      } else {
+        resolve(results);
+      }
+    }, randomTimeout);
+  });
+}
+
+export default function AutoSuggestion() {
+  // state to make suggestions visible or hidden
+  const [suggestionVisible, setSuggestionVisible] = useState(false);
+
+  // input value state
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // suggestion lis
+  const [suggestionList, setsuggestionList] = useState([]);
+
+  const inputRef = useRef(null);
+  const suggestionRef = useRef(null);
+  useEffect(() => {
+    function onClickCheck(e) {
+      if (e.target !== inputRef.current && e.target !== suggestionRef.current) {
+        setSuggestionVisible(false);
+      }
+    }
+
+    window.addEventListener("click", onClickCheck, false);
+
+    return () => {
+      window.removeEventListener("click", onClickCheck, false);
+    };
+  }, [suggestionVisible]);
+
+  const handleChange = (e) => {
+    let { value } = e.target;
+    setSearchQuery(value);
+    makeApiCall(value);
+  };
+
+  const makeApiCall = async (value) => {
+    if (value == "") {
+      setsuggestionList([]);
+      return;
+    }
+    try {
+      let list = await getSuggestions(value);
+      setsuggestionList(list);
+    } catch (error) {
+      setsuggestionList([]);
+      console.error("error while fetching suggestion", error);
+    }
+  };
+
+  return (
+    <div id="main">
+      <input
+        type="text"
+        name="search"
+        placeholder="search"
+        id="search"
+        onFocus={() => setSuggestionVisible(true)}
+        onChange={handleChange}
+        value={searchQuery}
+        ref={inputRef}
+      />
+      {suggestionVisible && (
+        <div id="suggestion-area" ref={suggestionRef}>
+          {suggestionList.length > 0 && (
+            <ul>
+              {suggestionList.map((suggestion, ind) => (
+                <li
+                  key={suggestion + "" + ind}
+                  style={{ textAlign: "left", cursor: "pointer" }}
+                  onClick={() => setSearchQuery(suggestion)}
+                >
+                  {" "}
+                  {suggestion}{" "}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+all are similar to previous one, but implemented with state and in react way 

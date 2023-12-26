@@ -16,3 +16,20 @@ tags:
 ## Function as reference
 
 1. on rerender new function reference is created for all functions, so if we passing the function as props then we have to cache it before passing for performance reasons
+
+## props
+
+1. we can pass anyting as props from string to react components to child components in react similar to Javascript
+2. props are data from `parent component` and we should not update the props in child component `(Read only)`
+3. components are `pure function` in terms of props and state. when function updates data which are not inside the function is called `sideEffects`.
+4. function should not update the data outside of the function, not even the variables outside the function.
+
+```jsx
+let a = 9;
+function App() {
+  a = 100; // we can't update the data outside of the function
+  // it is a side effect
+  return <h1>Number {a}</h1>
+}
+// wrong approach
+```
