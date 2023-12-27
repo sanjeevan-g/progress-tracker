@@ -1,0 +1,105 @@
+---
+title: "Switchcase Component in React"
+publishedAt: "2023-12-27"
+updatedAt: "2023-12-27"
+tags:
+  - React
+  - Machine Coding
+  - React Children
+---
+
+we have to create switch-case component in react similar to `Switchcase in js`
+
+## initial setup
+
+```jsx
+<CustomSwitch value="1000">
+  <CustomCase value={(e) => e < 10}>
+    <div>Hello 20</div>
+  </CustomCase>
+  <CustomCase value="20">Hello 20</CustomCase>
+  <CustomCase value="30">Hello 30</CustomCase>
+  <CustomCase value="10">
+    <div>Hello 10</div>
+  </CustomCase>
+  <DefaultCase>Hello 40</DefaultCase>
+</CustomSwitch>
+```
+
+## explanation
+
+- `CustomSwitch` is the parent component which has `value` prop
+- inside CustomSwitch, we have `CustomCase` and `DefaultCase`(mandatory)
+- `CustomCase` has value property
+  - value property could be either `string` or `function`
+- we have to render the CustomCase only if it has same value property if it is string, incase if it is a function then it should validate ( check the parent value property ) to true.
+- if there is no correct `CustomCase` then render `DefaultCase` instead.
+
+## full code
+
+```jsx
+import { Children } from "react";
+/*
+CustomCase accepts value props which can be string or function 
+if string => then it has to be equal to CustomSwitch value props
+if function => then selecting the item i based on function execution, which takes CustomSwitch value property as argument
+*/
+const CustomSwitch = ({ children, value }) => {
+  /* 
+    we have to return either CustomCase items which has same value else default case
+    */
+
+  const cases = [];
+  const defaults = [];
+  Children.forEach(children, (e) => {
+    // console.log(e);
+    if (e.type.name === "CustomCase") {
+      // now check element value prop
+      if (typeof e.props.value === "function") {
+        if (e.props.value(value)) {
+          cases.push(e);
+        }
+      } else if (value === e.props.value) {
+        // e.props.value is a string
+        cases.push(e);
+      }
+    } else if (e.type.name === "DefaultCase") {
+      defaults.push(e);
+    }
+  });
+
+  // we have to return either cases[] or defaults[]
+
+  return cases.length > 0 ? cases : defaults;
+};
+
+const CustomCase = ({ children }) => {
+  return children;
+};
+
+const DefaultCase = ({ children }) => {
+  return children;
+};
+
+export default function SwitchComponent() {
+  return (
+    <CustomSwitch value="20">
+      <CustomCase value={(e) => e > 10}><div>Hello 20</div></CustomCase>
+      <CustomCase value="20">Hello 20</CustomCase>
+      <CustomCase value="30">Hello 30</CustomCase>
+      <CustomCase value="10"><div>Hello 10</div></CustomCase>
+      <DefaultCase>Hello 40</DefaultCase>
+    </CustomSwitch>
+  );
+}
+```
+
+- create custom functions for each `CustomSwitch` , `CustomCase` and `DefaultCase`
+- in CustomCase and DefaultCase, we have to render the `children` no computation required so just return the children.
+- in CustomSwitch, get the children and value prop
+- using [React.Children](https://react.dev/reference/react/Children) iterate the children
+- store the child based on its component name we get from `e.type.name` where `e => child`
+- check the child prop value and if conditions meet then store it in cases array
+- store `DefaultCase` child in seperate array
+- finally return cases array if its length > 0 i.e `CustomCase meet the requirement` else return `DefaultCase` array
+- React component should return children at the end, it is an array of childs

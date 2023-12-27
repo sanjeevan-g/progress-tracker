@@ -1,7 +1,7 @@
 ---
 title: "React Notes - basics"
 publishedAt: "2023-12-22"
-updatedAt: "2023-12-22"
+updatedAt: "2023-12-27"
 tags:
   - React
   - Notes
@@ -29,7 +29,23 @@ let a = 9;
 function App() {
   a = 100; // we can't update the data outside of the function
   // it is a side effect
-  return <h1>Number {a}</h1>
+  return <h1>Number {a}</h1>;
 }
 // wrong approach
 ```
+
+## conditional rendering
+
+1. when using short circuiting ` ( expression && JSX ) ` use `boolean` values in expression, if it is an falsy value other then boolean, then that value will be rendered
+
+```jsx
+let a = 0;
+{ a && <p> i will not be rendered </p>  }
+
+// output: 0
+```
+here `a` is a falsy value so that  the falsy value will be retured from this short-circuit. else go with `ternary operator ( expression ? <true part> : <false part>) `
+
+## Javascript Mode { }
+
+1. inside `{ }` Javascript mode in jsx, we have to use only expression that will be computed to a result, we can't use `statements` like if-else statements inside javascript mode
