@@ -1,6 +1,7 @@
 import Streak from "@/components/Streak";
 import { allPosts } from "contentlayer/generated";
 
+export const revalidate = 3600;
 
 export default function Home() {
 
