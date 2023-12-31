@@ -1,0 +1,62 @@
+---
+title: "Infinite Scroll in react"
+publishedAt: "2023-12-31"
+updatedAt: "2023-12-31"
+tags:
+  - React
+  - Machine Coding
+  - window scroll
+---
+
+Infinite Scroll is a `lazy loading` technique used for optimazation, helps to load content when user scrolled to the last.
+
+In this, we will dynamically append the `50 elements` divs when user scrolled to the last.
+
+At first, we will have 50 divs in the DOM, we will add `scroll Event` to the the `window object` when
+we scroll to the end of the page then add next 50 divs
+
+## full code
+
+```jsx
+function App() {
+  let [count, setCount] = useState(50);
+
+  let elems = [];
+  // we have to add scroll event listener to the window object
+  // when we reach the end of thepage update the state
+
+  useEffect(() => {
+    const onScroll = () => {
+      /* 
+      window.innerHeight = window height;
+      window.scrollY => how much we scrolled
+      window.document.body.offsetHeight => overall whole height of the document ( content on screen + content below )
+      whole height of the content
+
+      when we scrolled down fully then 
+      window.innerHeight + window.scrollY == window.document.body.offsetHeight
+      */
+
+      // -50 => when 50px height is yet to be scrolled
+      if (
+        window.innerHeight + window.scrollY >=
+        window.document.body.offsetHeight - 100
+      ) {
+        setCount(count + 50);
+      }
+    };
+    window.addEventListener("scroll", onScroll);
+
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [count]);
+  for (let i = 0; i < count; i++) {
+    elems.push(
+      <div key={i} style={{ padding: "10px" }}>
+        {i + 1}
+      </div>
+    );
+  }
+
+  return <main>{elems}</main>;
+}
+```
