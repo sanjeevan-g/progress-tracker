@@ -1,0 +1,124 @@
+---
+title: "Restrict Object Mutation in javascript"
+publishedAt: "2024-01-1"
+updatedAt: "2024-01-1"
+tags:
+  - JavaScript
+  - Machine Coding
+  - Object.freeze
+  - Object.seal
+---
+
+javascript is highly flexiable and dynamic in nature, we can pass any type of data as arguments
+from objects to functions.
+
+it makes tough to track where issues are created, because we are `passing everything as reference` so it is hard to find
+where we updated the object
+
+so either we can create new object from old data while updating like
+
+```js
+let obj = { a: 10 };
+let newObj = { ...obj };
+```
+
+by this way, while updating newObj it won't affect the old object obj.
+
+else we have to restrict the object mutation.
+
+Available javascript functions to do this are [Object.freeze](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze) and [Object.seal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/seal)
+
+with `Object.freeze` we can restrict "add | update | delete" properties on an object.
+
+with `Object.seal` we can restrict 'add | delete' properties, but we can update the existing properties.
+
+## but one issue in both the function ?
+
+it won't seal or freeze children objects like
+
+```js
+let obj = { a: 10, b: { c: 11 } };
+Object.freeze(obj);
+obj.b.d = 100; // it works, will add new properties to child object
+```
+
+## we have to create function that will deepFreeze || deepSeal children objects too
+
+full code
+
+```js
+/*
+    we have restrict object mutation
+    2 ways => 1.object.freeze => we can't add|update|delete any property
+            => 2.Object.seal => we can't delete|add new property
+
+    but both has 1 issue, it can't freeze|seal child objects
+
+    let obj = { a: 1, b : { c:1}}
+    in Object.freeze(obj) | object.seal(obj) we can make changes in obj.b
+    so we must recusively freeze child objects also
+*/
+
+let obj = {
+  a: 10,
+  b: {
+    c: 100,
+  },
+};
+
+deepFreeze(obj);
+obj.a = 15; // no changes
+obj.b.d = 100; // no changes
+
+console.log(obj); // no changes
+//   {
+//       "a": 10,
+//       "b": {
+//           "c": 100
+//       }
+//   }
+
+function deepFreeze(obj) {
+  // get the key-value pairs
+  for (let key in obj) {
+    let val = obj[key];
+
+    if (typeof val === "object") {
+      deepFreeze(val);
+    }
+  }
+  Object.freeze(obj);
+}
+
+// similarly deepSeal
+
+let obj1 = {
+  a: 10,
+  b: {
+    c: 100,
+  },
+};
+deepSeal(obj1);
+obj1.a = 15; // will update
+obj1.b.d = 150; // no change, will not add new property
+
+console.log(obj1);
+// {
+//     "a": 15,
+//     "b": {
+//         "c": 100
+//     }
+// }
+
+function deepSeal(obj) {
+  // get the key-value pairs
+  for (let key in obj) {
+    let val = obj[key];
+
+    if (typeof val === "object") {
+      deepSeal(val);
+    }
+  }
+  Object.seal(obj);
+}
+```
