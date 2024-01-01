@@ -40,7 +40,7 @@ function PostComp({ post }: { post: Post }) {
             <p className="text-white text-xl"> {post.title} </p>
             {post.tags
                 ?
-                <ul className="flex gap-x-2">
+                <ul className="flex gap-x-2 flex-wrap">
                     {post.tags.map((tag: string) => (
                         <li className="text-sm text-neutral-400" key={tag}>{`#${tag}`} </li>
                     ))}
