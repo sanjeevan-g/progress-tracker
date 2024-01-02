@@ -19,7 +19,7 @@ export default function Page() {
     postData.sort( (a, b) => compareDesc(parseISO(a.publishedAt), parseISO(b.publishedAt)) )
 
     return <section>
-        <h1 className="font-medium text-2xl text-white mb-8">
+        <h1 className="font-medium text-2xl  mb-8">
             Recent Posts
         </h1>
         <SearchBar query={query} setQuery={setQuery} />
@@ -37,12 +37,12 @@ export default function Page() {
 function PostComp({ post }: { post: Post }) {
     return <Link href={`posts/${post.url}`} className="flex">
         <div className="flex flex-col">
-            <p className="text-white text-xl"> {post.title} </p>
+            <p className=" text-xl"> {post.title} </p>
             {post.tags
                 ?
                 <ul className="flex gap-x-2 flex-wrap">
                     {post.tags.map((tag: string) => (
-                        <li className="text-sm text-neutral-400" key={tag}>{`#${tag}`} </li>
+                        <li className="text-sm text-neutral-700 dark:text-neutral-400" key={tag}>{`#${tag}`} </li>
                     ))}
                 </ul>
                 : ""

@@ -6,7 +6,7 @@ export default function Streak({ posts }: { posts: Post[] }) {
     let currentStreak = calculateCurrentStreak(posts);
     return (
         // <div>Max Streak: {maxStreak} {currentStreak}</div>
-        <div className='flex flex-wrap gap-4 justify-around text-3xl text-orange-300'>
+        <div className='flex flex-wrap gap-4 justify-around text-3xl text-orange-700 dark:text-orange-400'>
             <p>Current Streak: <span className='font-semibold'>{currentStreak}</span></p>
             <p> Max Streak: <span className='font-semibold'>{maxStreak}</span> </p>
         </div>

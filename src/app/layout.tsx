@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} max-w-2xl mb-40 flex flex-col mx-4 mt-8 md:mx-auto md:mt-12`}>
+      <body className={`${inter.className} max-w-2xl mb-40 flex flex-col mx-4 mt-8 md:mx-auto md:mt-12 min-h-screen bg-zinc-200 dark:bg-dark`}>
         <main>
           <Navbar />
           {children}

@@ -13,6 +13,6 @@ export const SearchBar = ({ query, setQuery }: Props) => {
         setQuery(e.target.value);
     }
     return <div >
-        <input value={query} type="search" className="w-full bg-transparent p-2 outline-none border-2 border-neutral-50 rounded" onChange={onChangeHandler} placeholder="Search Post" />
+        <input value={query} type="search" className="w-full bg-transparent p-2 outline-none border-2 border-stone-500 dark:border-neutral-50 rounded" onChange={onChangeHandler} placeholder="Search Post" />
     </div>
 }

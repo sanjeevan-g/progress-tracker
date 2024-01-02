@@ -42,14 +42,14 @@ export default function Page({ params }: Params) {
     let dateFormat = format(new Date(post.publishedAt), 'yyyy-MM-dd')
 
     return <section>
-        <Link href="/posts" className="inline-flex gap-x-2 items-center font-medium text-2xl text-neutral-200 hover:text-neutral-400 hover:no-underline">
+        <Link href="/posts" className="inline-flex gap-x-2 items-center font-medium text-2xl transition-all hover:text-neutral-700 dark:hover:text-neutral-200 hover:no-underline">
             <BsArrowLeft /> Back
         </Link>
 
-        <h1 className="mt-10 mb-2 text-4xl text-white font-semibold">
+        <h1 className="mt-10 mb-2 text-4xl font-semibold">
             {post.title}
         </h1>
-        <p className="capitalize text-neutral-200 text-lg ">published on : <span className="font-medium">{dateFormat}</span></p>
+        <p className="capitalize dark:text-neutral-200 text-neutral-700 text-lg ">published on : <span className="font-medium">{dateFormat}</span></p>
         {
             post.tags &&
             <ul className="flex flex-wrap gap-2 mt-5">
