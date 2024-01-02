@@ -1,0 +1,95 @@
+---
+title: "Get different value for Object property using Proxy in javascript"
+publishedAt: "2024-01-2"
+updatedAt: "2024-01-2"
+tags:
+  - Javascript
+  - Coding
+  - Proxy
+  - get
+  - set
+---
+
+on accessing object.property, the value of the obj.property has to increase by 1
+
+## initial code
+
+```js
+let obj = {
+  a: 0,
+  b: 100,
+};
+
+console.log(obj.a); // 1
+console.log(obj.a); // 2
+console.log(obj.a); // 3
+console.log(obj.a); // 4
+console.log(obj.b); // 100 "b" won't get updated
+```
+
+on accessing obj.a, its value has to increase by 1 but not on accessing obj.b, it can be done by using [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+
+## Proxy
+
+if we want to intercept `get or set` methods for an object we can use proxy for that object, after evaluating we can return or set the value for that ref object.
+
+## full code
+
+```js
+/*
+    if we want to intercept get/set properties of an object, then we can use proxy of that object
+    proxy will update the orginal object
+*/
+let obj = {
+  a: 0,
+  b: 100,
+};
+
+obj = new Proxy(obj, {
+  get: (target, property) => {
+    // target => obj we received from Proxy()
+    // property => target property
+
+    if (property === "a") {
+      // if property is a
+      target[property] = target[property] + 1;
+    }
+
+    // return target.property
+    return target[property];
+  },
+  set: (target, property, value) => {
+    if (property === "voteAge") {
+      if (!Number.isInteger(value)) {
+        throw new TypeError("The voteAge is not an integer");
+      }
+      if (value < 18) {
+        throw new RangeError("voteAge must be greater than 18");
+      }
+    }
+
+    // default behavior to store the value
+    target[property] = value;
+
+    return true;
+  },
+});
+
+console.log(obj.a); // 1
+console.log(obj.a); // 2
+console.log(obj.a); // 3
+console.log(obj.a); // 4
+console.log(obj.b); // 100 "b" won't get updated
+// each time we access the property 'a', we have to update the value by 1
+
+// similarly with setters
+// obj.voteAge = 17; // Uncaught RangeError: voteAge must be greater than 18
+
+obj.voteAge = 20; // accepted
+console.log(obj);
+//       {
+//     "a": 5,
+//     "b": 100,
+//     "voteAge": 20
+// }
+```
