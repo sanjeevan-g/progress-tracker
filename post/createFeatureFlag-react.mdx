@@ -1,0 +1,88 @@
+---
+title: "Create a Feature Flag and share it across the react application"
+publishedAt: "2024-1-3"
+updatedAt: "2024-1-3"
+tags:
+  - React
+  - Feature Flag
+  - Coding
+  - Context
+  - createContext
+  - useContext
+---
+
+## What is feature flag
+
+A feature flag is a software development process/pattern used to enable or disable functionality remotely without deploying code.
+New features can be deployed without making them visible to users. example: Premium and non-premium users etc.
+
+## How to share the feature flag across the react application
+
+we can use [contextApi](https://react.dev/learn/passing-data-deeply-with-context) to share the feature flag value across the react application.
+
+## code
+
+create context , contextProvider in seperate file
+
+```jsx
+/* FeatureFlagContext.jsx */
+import { createContext, useState } from "react";
+
+export const FeatureContext = createContext({}); // initialize with empty object
+
+export const FeatureContextProvider = ({ children }) => {
+  const [features] = useState({
+    isGooglePayEnabled: false,
+    isApplePayEnabled: true,
+  });
+
+  return (
+    <FeatureContext.Provider value={{ features }}>
+      {children}
+    </FeatureContext.Provider>
+  );
+};
+```
+
+- first create the context `FeatureContext` it is used to get context values in children
+- create contextProvider element, it will wrap on top of the application, it receives value property, pass out features obj to value property.
+
+## App.jsx
+
+```jsx
+function App() {
+  return (
+    <FeatureContextProvider>
+      <PaymentOptions />
+    </FeatureContextProvider>
+  );
+}
+```
+
+we have wrapped the `PaymentOptions` component by `FeatureContextProvider`.
+
+## PaymentOptions
+
+```jsx
+const PaymentOptions = () => {
+  const { features } = useContext(FeatureContext);
+
+  return (
+    <>
+      <h1> Payment Method </h1>
+      <div
+        style={{
+          display: "flex",
+          gap: "0.5rem",
+          justifyContent: "center",
+        }}
+      >
+        {features.isGooglePayEnabled && <button>Google pay </button>}
+        {features.isApplePayEnabled && <button>Apple pay </button>}
+      </div>
+    </>
+  );
+};
+```
+- by using `useContext()` hook, pass the `FeatureContext`, it will return the value `FeatureContext.Provider value={{ features }}` that we passed at the top in contextProvider.
+- based on features we received, render `Google pay` button and `Apple pay` button
