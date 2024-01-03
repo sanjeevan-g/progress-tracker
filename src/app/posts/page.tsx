@@ -13,7 +13,8 @@ export default function Page() {
     const [query, setQuery] = useState<string>("");
 
     let postData: Post[] = allPosts.filter(post => {
-        return query.length < 3 || post.title.toLowerCase().includes(query.toLowerCase()) || post.tags?.some((tag) => tag.toLowerCase().includes(query.toLowerCase()));
+        const searchQuery = query.trim();
+        return searchQuery.length < 3 || post.title.toLowerCase().includes(searchQuery.toLowerCase()) || post.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     });
 
     postData.sort( (a, b) => compareDesc(parseISO(a.publishedAt), parseISO(b.publishedAt)) )
