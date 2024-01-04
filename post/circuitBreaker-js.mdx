@@ -1,0 +1,97 @@
+---
+title: "circuit breaker in javascript"
+publishedAt: "2024-1-4"
+updatedAt: "2024-1-4"
+tags:
+  - Javascript
+  - Machine Coding
+  - circuit breaker
+  - closures
+---
+
+Circuit breaker is an `design pattern` which is used to hault api call for given time period when error occured for given no of times,
+then retry after threshold time.
+
+## states in circuit breaker
+
+- `open`: when function is hault for threshold time, we can't call api function
+- `closed`: when api call is successful after open state or failure not happened.
+
+## Inital code
+
+```js
+let t = testFunction();
+let c = circuitBreaker(t, 3, 200);
+
+c(); // "error"
+c(); // "error"
+c(); // "error"
+
+// service is closed for 200 MS
+c(); // "service unavailable"
+c(); // "service unavailable"
+c(); // "service unavailable"
+c(); // "service unavailable"
+c(); // "service unavailable"
+
+// service becomes available after 300ms
+setTimeout(() => {
+  console.log(c());
+}, 200); // "api successful";
+```
+
+- `testFunction` function wll throw error for first 3 calls then return the result "api successful"
+- `circuitBreaker` function will accept function, failureCount, timeThreshold and `returns a function`.
+- on calling that function if error occurs for failureCount then the function call will hault (circuit open) for timeThreshold.
+
+## full code
+
+```js
+// testFunction throws error for first 3 times and then return result
+function testFunction() {
+  let count = 0;
+  return () => {
+    count++;
+    if (count < 4) {
+      throw "error";
+    }
+    return "api successful";
+  };
+}
+
+function circuitBreaker(fn, failureCount, threshold) {
+  let failures = 0; // number of failures
+  let resetTime = Date.now(); // init with curent time
+
+  let isOpen = false; // current state, it is closed so all works fine.
+
+  return function (...args) {
+    if (isOpen) {
+      // open circuit, check for threshold
+      if (Date.now() > resetTime) {
+        // circuit is now closed
+        console.log(Date.now(), resetTime);
+        isOpen = false;
+      } else {
+        // still open
+        console.error("circuit is still open, wait for some time...");
+        return; // return the function to end here
+      }
+    }
+
+    try {
+      let res = fn(...args);
+      failures = 0;
+      return res;
+    } catch (error) {
+      failures++;
+
+      if (failures >= failureCount) {
+        isOpen = true;
+        resetTime = Date.now() + threshold;
+      }
+      console.log(error);
+    }
+  };
+}
+```
