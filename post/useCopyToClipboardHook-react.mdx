@@ -1,0 +1,69 @@
+---
+title: "create a custom hook that helps to copy text to clipboard"
+publishedAt: "2024-1-5"
+updatedAt: "2024-1-5"
+tags:
+  - React
+  - Machine Coding
+  - custom hook
+  - navigator
+  - BOM
+---
+
+we have to create a custom hook `useCopyToClipboard()` that return [ copiedValue ,copy function ].
+copy fn accept the text and copies text to clipboard.
+
+### but, how to access clipboard
+
+[clipboard](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/clipboard) is a part of [navigator object](https://www.javascripttutorial.net/javascript-bom/javascript-navigator/) which is a BOM (browser object model).
+
+### hook code
+
+```jsx
+function useCopyToClipboard() {
+  const [copiedText, setCopiedText] = useState(null);
+
+  const copy = async (text) => {
+    if (!navigator?.clipboard) {
+      console.warn("clipboard is not available");
+      return false;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      // success
+      setCopiedText(text);
+      return true;
+    } catch (error) {
+      console.warn(" can't copy text to clipboard");
+      setCopiedText(null);
+      return false;
+    }
+  };
+
+  return [copiedText, copy];
+}
+```
+
+## implementation
+
+```jsx
+function App() {
+  const [value, copy] = useCopyToClipboard();
+
+  const [text, setText] = useState("");
+
+  return (
+    <>
+      <h2> Custom hook use copy text to clipboard </h2>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      ></textarea>
+      <br />
+      <button onClick={() => copy(text)}>Copy text</button>
+      <p>{value ? value : "No string copied yet !!"}</p>
+    </>
+  );
+}
+```
