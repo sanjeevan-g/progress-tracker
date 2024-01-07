@@ -1,0 +1,129 @@
+---
+title: "implement throttle function in javascript"
+publishedAt: "2024-1-7"
+updatedAt: "2024-1-7"
+tags:
+  - JavaScript
+  - Machine Coding
+  - Throttling
+---
+
+## Throttling in javascript
+
+throttle is used to limit the number of times a function is called, but, unlike debounce, throttle will call the function passed to it every time the delay ends as long as the trigger for the function is still happening.
+
+## Advantages
+
+1. optimize the website
+2. avoid continues api calls to server
+3. on multiple concurrent calls, it will execute atmost once after every given delay
+
+## types of Throttling
+
+1. based on count
+
+   - will execute the function only after calling given count times
+
+2. based on delay
+
+   - will execute at first then after delay, inbetween calls are ignored
+
+3. based on options
+   - leading - normal Throttling with delay (first call and after delay)
+   - trailing - will not execute immediately only after the delay time, will also involke on last call after delay
+   - both - will call at first and after delay and at last call after delay
+
+## initial setup
+
+```js
+<button id="btn">click!</button>;
+let btn = document.getElementById("btn");
+
+const onClick = () => {
+  console.log("clicked !!", Date.now());
+};
+btn.addEventListener("click", throttleFn);
+```
+
+## based on count
+
+```js
+const throttle = (fn, count) => {
+  let callCounter = 0;
+
+  return function (...args) {
+    if (++callCounter !== count) return; // not to work
+
+    // else
+    callCounter = 0; // reset call counter
+    fn.apply(this, args);
+  };
+};
+
+const throttleFn = throttle(onClick, 3); // based on count, run function on count*i clicks, i = 1,2,3..
+```
+
+## based on delay
+
+```js
+const throttle = (fn, delay) => {
+  let shouldWait = false; // true when function is in throttle mode
+
+  return function (...args) {
+    if (shouldWait) {
+      return;
+    }
+
+    fn.apply(this, args);
+    shouldWait = true; // executed fn now wait for delay time
+    setTimeout(() => {
+      shouldWait = false;
+    }, delay);
+  };
+};
+
+const throttleFn = throttle(onClick, 1000); // will work on 0 , 1sec, 2sec ...
+// issues => inbetween fn calls are ignored and last fn call is also ignored
+```
+
+## with options
+
+```js
+// 3. delay with options
+// leading -> normal throttle fn, work at first and then after delay time
+// trailing -> work after the end of delay time, work at last call after delay
+
+const throttle = (fn, delay, options) => {
+  let shouldWait = false; // true when function is in throttle mode
+  let lastArgs; // holds the arguments of last call
+
+  const { leading, trailing } = options;
+
+  const timeoutFunc = () => {
+    if (lastArgs && trailing) {
+      // last args and in trailing mode
+      fn.apply(this, lastArgs);
+      lastArgs = null;
+      setTimeout(() => timeoutFunc(), delay);
+    } else {
+      shouldWait = false; // default mode
+    }
+  };
+
+  return function (...args) {
+    if (shouldWait) {
+      lastArgs = args; // update last args with current arguments
+      return;
+    }
+
+    fn(...args);
+    shouldWait = true; // executed fn now wait for delay time
+    setTimeout(() => timeoutFunc(), delay);
+  };
+};
+
+const throttleFn = throttle(onClick, 1000, {
+  leading: true,
+  trailing: false,
+});
+```
