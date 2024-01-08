@@ -1,0 +1,172 @@
+---
+title: "Design Throttle function that runs only limited number of tasks at a time, pauses the other tasks into a queue."
+publishedAt: "2024-1-8"
+updatedAt: "2024-1-8"
+tags:
+  - JavaScript
+  - Machine Coding
+  - Throttling
+  - async await
+---
+
+Initialize the throttle function with maxCount, maxCount of task it can run at a time
+
+throttle function must have psuh and run function, we push the task using push function
+
+## Initial Code
+
+```js
+let ArrayThrottle = new throttle(2);
+
+ArrayThrottle.push((cb) => {
+  taskPrototype().then(() => {
+    console.log("task A");
+    cb(); // call the callback
+  });
+});
+
+ArrayThrottle.push((cb) => {
+  taskPrototype().then(() => {
+    console.log("task B");
+    cb(); // call the callback
+  });
+});
+
+ArrayThrottle.push((cb) => {
+  taskPrototype().then(() => {
+    console.log("task C");
+    cb(); // call the callback
+  });
+});
+
+ArrayThrottle.push((cb) => {
+  taskPrototype().then(() => {
+    console.log("task D");
+    cb(); // call the callback
+  });
+});
+
+ArrayThrottle.push((cb) => {
+  taskPrototype().then(() => {
+    console.log("task E");
+    cb(); // call the callback
+  });
+});
+
+function taskPrototype() {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(), 2000);
+  });
+}
+
+/* 
+// After 2 sec break 
+task A
+task B
+// After 2 sec break
+task C
+task D
+// After 2 sec break
+task E
+*/
+```
+
+- Initialize throttle function with 2 as max count
+- task will accept a callback, will run after task is completed.
+- taskPrototype() will return a promise which will resolve in 2 seconds, we use this to mimic the task behavior.
+- push the task in to throttle function using `push()` function.
+
+## Throttle function
+
+```js
+/* 
+throttle object must have push fn to push the task
+task is an async function, which can run the callback after the task is complete
+*/
+
+function throttle(maxCount = 1) {
+  this.queue = [];
+  this.count = 0;
+
+  this.push = (task) => {
+    this.queue.push(task);
+    this.run(); // run the run fn
+  };
+
+  this.run = () => {
+    // check if any count <= maxCount ( no of tasks running <= maxCount )
+
+    while (this.count < maxCount && this.queue.length > 0) {
+      let task = this.queue.shift();
+      this.count++; // we are executing new task
+
+      // task accepts callback fn
+      task(() => {
+        this.count--;
+        this.run(); // run the "this.run" function again
+      });
+    }
+  };
+}
+
+let ArrayThrottle = new throttle(2);
+
+ArrayThrottle.push((cb) => {
+  taskPrototype().then(() => {
+    console.log("task A");
+    cb(); // call the callback
+  });
+});
+
+ArrayThrottle.push((cb) => {
+  taskPrototype().then(() => {
+    console.log("task B");
+    cb(); // call the callback
+  });
+});
+
+ArrayThrottle.push((cb) => {
+  taskPrototype().then(() => {
+    console.log("task C");
+    cb(); // call the callback
+  });
+});
+
+ArrayThrottle.push((cb) => {
+  taskPrototype().then(() => {
+    console.log("task D");
+    cb(); // call the callback
+  });
+});
+
+ArrayThrottle.push((cb) => {
+  taskPrototype().then(() => {
+    console.log("task E");
+    cb(); // call the callback
+  });
+});
+
+function taskPrototype() {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(), 2000);
+  });
+}
+
+/* 
+// After 2 sec break 
+task A
+task B
+// After 2 sec break
+task C
+task D
+// After 2 sec break
+task E
+*/
+```
+
+- this.queue is to store the task in the queue
+- this.count is to count no of concurrent task running
+- push is to push the new task and run the this.run
+- run() => check no of concurrent task running, if it is less than max count then execute the new task
+- in task callback fn, reduce the count and re run the this.run method
+- after old task is completed, it will run the callback fn, it will re run the this.run method again.
