@@ -1,0 +1,172 @@
+---
+title: "Multi Stepper in react"
+publishedAt: "2024-1-9"
+updatedAt: "2024-1-9"
+tags:
+  - React
+  - Machine Coding
+  - Stepper
+  - React.cloneElement
+---
+
+`Stepper` component will accept list of components and create a stepper out of it, each component have there own forms and fields
+
+we have to pass 2 functions onPrev and onNext to component,so it can move back and forth between steps
+
+## App.jsx
+
+```jsx
+import "./App.css";
+import Stepper from "./Stepper";
+
+function App() {
+  const list = [
+    <Example1 />,
+    <Example2 />,
+    <Example3 />,
+    <Example4 />,
+    <Example5 />,
+  ];
+
+  return (
+    <div className="app">
+      <Stepper list={list} />
+    </div>
+  );
+}
+
+const Example1 = ({ onPrev, onNext }) => {
+  return (
+    <>
+      <h1>Hello 1</h1>
+      <div>
+        <button onClick={onPrev}>Prev</button>
+        <button onClick={onNext}>Next</button>
+      </div>
+    </>
+  );
+};
+
+const Example2 = ({ onPrev, onNext }) => {
+  return (
+    <>
+      <h1>Hello 2</h1>
+      <div>
+        <button onClick={onPrev}>Prev</button>
+        <button onClick={onNext}>Next</button>
+      </div>
+    </>
+  );
+};
+
+const Example3 = ({ onPrev, onNext }) => {
+  return (
+    <>
+      <h1>Hello 3</h1>
+      <div>
+        <button onClick={onPrev}>Prev</button>
+        <button onClick={onNext}>Next</button>
+      </div>
+    </>
+  );
+};
+
+const Example4 = ({ onPrev, onNext }) => {
+  return (
+    <>
+      <h1>Hello 4</h1>
+      <div>
+        <button onClick={onPrev}>Prev</button>
+        <button onClick={onNext}>Next</button>
+      </div>
+    </>
+  );
+};
+
+const Example5 = ({ onPrev, onNext }) => {
+  return (
+    <>
+      <h1>Hello 5</h1>
+      <div>
+        <button onClick={onPrev}>Prev</button>
+        <button onClick={onNext}>Next</button>
+      </div>
+    </>
+  );
+};
+
+export default App;
+```
+
+- `list` holds the list of 5 `Example` elements, each accept onPrev and onNext functions as props
+- this `Example` component decides to move next or prev based on its forms and fields etc.
+
+## Stepper.jsx
+
+```jsx
+/* eslint-disable react/prop-types */
+
+import React, { useState } from "react";
+
+/* 
+stepper function receives list of step components, 
+each of the components have their own forms and fields etc...
+and also receive handlePrev and handleNext functions also
+*/
+export default function Stepper({ list }) {
+  const N = list.length;
+
+  const [activeStep, setActiveStep] = useState(0);
+
+  let steps = list.map((item, index) => (
+    <div
+      className={`step ${activeStep >= index ? "active" : ""}`}
+      key={index}
+      onClick={() => setActiveStep(index)}
+    >
+      {index + 1}
+    </div>
+  ));
+
+  const progressLineLength = (100 / (N - 1)) * activeStep;
+
+  const onNext = () => {
+    if (activeStep !== N - 1) {
+      setActiveStep(activeStep + 1);
+    }
+  };
+
+  const onPrev = () => {
+    if (activeStep !== 0) {
+      setActiveStep(activeStep - 1);
+    }
+  };
+
+  // const CurrentComponent = ;
+
+  return (
+    <div className="stepper">
+      <div className="step-container">
+        <div className="stepper-wrapper">{steps}</div>
+        <div
+          className="progress-line"
+          style={{ width: `${progressLineLength}%` }}
+        ></div>
+      </div>
+      {React.cloneElement(list[activeStep], { onPrev, onNext })}
+    </div>
+  );
+}
+
+/*
+we are using React.cloneElement because we need to pass props to element received as props
+only way is to clone the element by React.cloneElement
+*/
+```
+- steps circle
+    - based on length of the list, we create steps circle with value starts with 1
+    - initially step circle are `gray` if activeStep greater than index then make it `blue`
+    - onclick on steps circle we can change the active step
+- Rendering list Component
+   - each component receives onNext and onPrev functions as props, we can't pass this to component directly
+   - so we clone the component using [React.cloneElement](https://react.dev/reference/react/cloneElement) which accept `component and props` as inputs and return new Component
