@@ -1,0 +1,138 @@
+---
+title: "Highlight words in dom element using javascript"
+publishedAt: "2024-1-10"
+updatedAt: "2024-1-10"
+tags:
+  - Javscript
+  - Machine Coding
+  - Set
+---
+
+we are given the text content of a DOM element and keywords, we have to highlight those keywords in the string.
+
+keywords could be whole word or just a part of a word, in one word there could be multiple keywords, if they overlap then merge them together as one
+
+#### Example
+
+```js
+word = "javascript";
+keywords = ["java", "script"];
+```
+
+then highlight whole `javascript` word.
+
+and also..
+
+```js
+word = "hightlighting";
+keywords = ["high", "ing"];
+```
+
+then highlight only `high`light`ing` words only.
+
+## Full Code
+
+```js
+<p id="test">
+  Hi, Highlighting text using Javascript and using datastructures and
+  algorithms.
+</p>
+
+// script
+
+let keywords = ["high", "ing", "java", "Script", "datastructure", "algorithms"];
+
+// lets get the string from dom
+let elem = document.getElementById("test");
+let string = elem.innerText;
+
+const highlight = (str, keywords, isCaseInSensitive = false) => {
+  if (isCaseInSensitive) {
+    keywords = keywords.map((keyword) => keyword.toLowerCase());
+  }
+
+  // lets use Set to hold keywords for faster lookups
+  let uniqueKeyWords = new Set(keywords);
+
+  // split str into words
+  let words = str.split(" ");
+
+  function hasWord(word) {
+    word = isCaseInSensitive ? word.toLowerCase() : word;
+    return uniqueKeyWords.has(word);
+  }
+
+  function pointsToHighlightWord(arr, word) {
+    let res = "";
+
+    let start = arr[0][0];
+    let end = arr[0][1];
+
+    res = word.substring(0, start);
+
+    for (let i = 1; i < arr.length; i++) {
+      if (end >= arr[i][0]) {
+        // overlapping
+        end = arr[i][1];
+      } else {
+        // not overlapping, add cur highlight test
+        res += `<strong>${word.substring(start, end)}</strong>`;
+        start = arr[i][0];
+        res += word.substring(end, start); // inbetween char between new start and old end End[...ch]Start
+        end = arr[i][1];
+      }
+    }
+    res += `<strong>${word.substring(start, end)}</strong>${word.substring(
+      end
+    )}`;
+    return res;
+  }
+
+  let result = words.map((word) => {
+    // if we have whole word
+    if (hasWord(word)) {
+      // highlight whole word
+      return `<strong>${word}</strong>`;
+    }
+
+    // else check word has any keywords or not
+    // if we have keywords the highlight those words
+    // word => javascript, keywords => [java , script]
+    // then highlight whole word
+
+    let wordPoints = [];
+    let queryWord = word;
+    // we should not update word so create new variable to hold lower case word
+    if (isCaseInSensitive) {
+      queryWord = word.toLowerCase();
+    }
+    for (let key of uniqueKeyWords) {
+      if (queryWord.includes(key)) {
+        let start = queryWord.indexOf(key);
+        let end = start + key.length;
+        wordPoints.push([start, end]);
+      }
+    }
+
+    if (wordPoints.length > 0) {
+      return pointsToHighlightWord(wordPoints, word);
+    }
+
+    return word;
+  });
+
+  return result.join(" ");
+};
+
+let highlightedText = highlight(string, keywords, true);
+elem.innerHTML = highlightedText;
+```
+
+- `highlight()` function accepts para innerTextCnt, keyword and boolean for case-insensitive comparison 
+- if case-insensitive comparison then convert keywords to toLowerCase
+- add keywords to set for faster lookups
+- convert string to array of words
+- iterate words in the array, if we have matching keyword
+    - if we have wrap the word with `<strong></strong>` tags
+    - if we have part of the word then wrap only that part
+- join the new highlight words and add it to `p`'s innerHTML.
