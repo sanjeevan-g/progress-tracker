@@ -1,0 +1,139 @@
+---
+title: "Implement an in-memory search engine in javascript"
+publishedAt: "2024-1-11"
+updatedAt: "2024-1-11"
+tags:
+  - Javscript
+  - Machine Coding
+  - Algorithms
+  - Map
+  - filter
+---
+
+implement an in-memory search engine where multiple objects can be stored
+under particular namespaces and can search them and can sort the search results by passing orderBy parameter.
+
+## Initial Code
+
+```js
+const searchEngine = new InMemorySearch();
+searchEngine.addDocuments(
+  "Movies",
+  { name: "Avengers", rating: 7.5, year: 2017 },
+  { name: "Avengers one", rating: 7.5, year: 2012 },
+  { name: "Avengers age of ultron", rating: 8, year: 2015 },
+  { name: "Avengers infinity stone", rating: 8.5, year: 2016 },
+  { name: "Black Adam", rating: 8.7, year: 2022 },
+  { name: "Jhon wick 4", rating: 8.2, year: 2023 },
+  { name: "Black Panther", rating: 9.0, year: 2022 }
+);
+const result = searchEngine.search("Movies", (e) => e.rating >= 8.5, {
+  key: "rating", // sorting key
+  asc: false, // false => decending, true => ascending
+});
+console.log(result);
+// output
+// [
+//     {
+//         "name": "Black Panther",
+//         "rating": 9,
+//         "year": 2022
+//     },
+//     {
+//         "name": "Black Adam",
+//         "rating": 8.7,
+//         "year": 2022
+//     },
+//     {
+//         "name": "Avengers infinity stone",
+//         "rating": 8.5,
+//         "year": 2016
+//     }
+// ]
+```
+
+- `InMemorySearch()` must have addDocuments and search functions
+- `addDocuments(namespaces, ...documents)` first parameter is the namespace and the rest are the documents
+  - namespace -> key based onwhich the documents are stored, can have multiple namespace and each namespace have multiple documents
+- `search(namespace, filterFn, orderBy)`
+  - namespace -> fetch documents based on namespace
+  - filterFn -> filter the documents based on this filter function
+  - orderBy -> key , asc. key => sorting key, asc => ascending | descending.
+
+## Full Code
+
+```js
+function InMemorySearch() {
+  this.entities = new Map(); // to hold data based on namespace
+
+  this.addDocuments = function (namespace, ...documents) {
+    let existing = this.entities.get(namespace);
+
+    if (existing) {
+      this.entities.set(namespace, [...existing, ...documents]);
+    }
+    this.entities.set(namespace, [...documents]);
+  };
+
+  this.search = function (namespace, filterFn, orderBy) {
+    let documents = this.entities.get(namespace);
+    let filtered = [...documents].filter(filterFn);
+
+    if (orderBy) {
+      let { key, asc } = orderBy;
+      return filtered.sort((a, b) => {
+        if (asc) {
+          if (typeof a[key] === "string") {
+            return a[key].localeCompare(b[key]);
+          } else {
+            return a[key] - b[key];
+          }
+        } else {
+          if (typeof a[key] === "string") {
+            return b[key].localeCompare(a[key]);
+          } else {
+            return b[key] - a[key];
+          }
+        }
+      });
+    }
+    return filtered;
+  };
+}
+
+const searchEngine = new InMemorySearch();
+searchEngine.addDocuments(
+  "Movies",
+  { name: "Avengers", rating: 7.5, year: 2017 },
+  { name: "Avengers one", rating: 7.5, year: 2012 },
+  { name: "Avengers age of ultron", rating: 8, year: 2015 },
+  { name: "Avengers infinity stone", rating: 8.5, year: 2016 },
+  { name: "Black Adam", rating: 8.7, year: 2022 },
+  { name: "Jhon wick 4", rating: 8.2, year: 2023 },
+  { name: "Black Panther", rating: 9.0, year: 2022 }
+);
+const result = searchEngine.search("Movies", (e) => e.rating >= 8.5, {
+  key: "rating",
+  asc: false,
+});
+console.log(result);
+
+// output
+// [
+//     {
+//         "name": "Black Panther",
+//         "rating": 9,
+//         "year": 2022
+//     },
+//     {
+//         "name": "Black Adam",
+//         "rating": 8.7,
+//         "year": 2022
+//     },
+//     {
+//         "name": "Avengers infinity stone",
+//         "rating": 8.5,
+//         "year": 2016
+//     }
+// ]
+```
