@@ -1,0 +1,193 @@
+---
+title: "Html encoding of string in javascript"
+publishedAt: "2024-1-12"
+updatedAt: "2024-1-12"
+tags:
+  - Javscript
+  - Machine Coding
+  - Stack
+  - PriorityQueue
+---
+
+we will be given with string str and array of start, end of a tag.
+if 2 tags ovelaps, close currently opened tag and open after the overlapping tag is closed.
+
+## init Code
+
+```js
+const encoded = parse("Hello, World", [
+  [0, 2, "i"],
+  [7, 10, "u"],
+  [4, 9, "b"],
+  [2, 7, "i"],
+  [7, 9, "u"],
+]);
+document.getElementById("result").innerHTML = encoded;
+console.log(encoded);
+
+//   Output: "<i>He<i>l</i></i><i>l<b>o, <u><u>W</u></u></b></i><b><u><u>or</u></u></b><u>l</u>d";
+```
+
+- this is similar to `track paranthesis open and close using stack`
+- we use PriorityQueue here when more then 1 tag opens in same indexOf
+  - first create tag for longer length then tag with shorter length
+
+## full Code
+
+```js
+const encoded = parse("Hello, World", [
+  [0, 1, "b"],
+  // [0, 2, "i"],
+  [7, 10, "u"],
+  [4, 9, "b"],
+  [2, 7, "i"],
+  [7, 9, "u"],
+]);
+document.getElementById("result").innerHTML = encoded;
+console.log(encoded);
+const encoded2 = parse2("Hello, World", [
+  [0, 1, "b"],
+  // [0, 2, "i"],
+  [7, 10, "u"],
+  [4, 9, "b"],
+  [2, 7, "i"],
+  [7, 9, "u"],
+]);
+document.getElementById("result").innerHTML = encoded;
+console.log(encoded2);
+
+//   Output: "<i>He<i>l</i></i><i>l<b>o, <u><u>W</u></u></b></i><b><u><u>or</u></u></b><u>l</u>d";
+
+/*
+    this is related to stack and priority queues
+    we will solve this similar to opening and closing paranthesis using stack problem
+    */
+
+// implement statck first
+
+function Stack() {
+  let list = [];
+  let index = 0;
+
+  this.push = function (val) {
+    list[index++] = val; // after adding new element, index will be incremented
+  };
+
+  this.pop = function () {
+    return list[--index];
+  };
+
+  this.peek = function () {
+    return list[index - 1];
+  };
+}
+
+// Tag
+// this.text will hold the string from <tag> ... str </tag>
+function Tag(start, end, tag) {
+  this.start = start;
+  this.end = end;
+  this.tag = tag;
+  this.text = "";
+  this.getRange = function () {
+    return this.end - this.start;
+  };
+}
+
+// will act as PQ,
+// track => arr of given string.length
+// start => track[index]
+// if multiple items are in same track[start] then sort them based on (end - start) in decending order
+// if 2 tags start with same index then shorter tag has to close first so sort in decending order
+function addAndSort(track, index, tag) {
+  if (!track[index]) {
+    track[index] = [];
+  }
+
+  track[index] = [...track[index], tag];
+
+  track[index].sort((a, b) => b.getRange() - a.getRange());
+}
+
+function parse(str, markups) {
+  // lets create a track first
+  // this will hold new starting tags at each index
+  const track = new Array(str.length).fill(null);
+
+  // now iterate the markups and add those tags in the track
+  for (let markup of markups) {
+    const [start, end, tag] = markup;
+    addAndSort(track, start, new Tag(start, end, tag));
+  }
+
+  // now create a stack to hold the start and end of the tags
+  // by default add an empty data to stack
+  // html.peek() is the current opening tag
+
+  const html = new Stack();
+  html.push(new Tag(0, Number.MAX_VALUE, ""));
+
+  // now iterate the string
+
+  // console.log(track);
+
+  for (let i = 0; i < str.length; i++) {
+    // check the track for any start tags
+
+    while (track[i] && track[i].length > 0) {
+      const cur = track[i].shift(); // it is Tag obj
+      // add its tag to its text
+      cur.text = `<${cur.tag}>`;
+
+      //     // now check, cur.end overlapping with stack peek tag(current opening tag).end
+
+      if (cur.end > html.peek().end) {
+        // if overlaps
+        // split the cur tag start after html.peek().end with cur.end as end
+        const split = new Tag(html.peek().end + 1, cur.end, cur.tag);
+        // update the cur's tags end
+        cur.end = html.peek().end;
+        // add this new split tag to track
+        addAndSort(track, html.peek().end + 1, split);
+      }
+      //     // add cur tag to stack
+      //     // now cur tag is the current opening tag
+      html.push(cur);
+    }
+
+    html.peek().text += str[i]; // add str[i] to the current opening tag text
+
+    // current opening is going to close
+    while (html.peek().end === i) {
+      html.peek().text += `</${html.peek().tag}>`; // add the closing tag
+
+      // pop the current tag
+      const temp = html.pop();
+
+      html.peek().text += temp.text; // closed tags content is now added to current opening tag
+      // by this way all the string+tags data will be get from the last stack value (which is tag we added at stack init)
+    }
+  }
+
+  return html.peek().text;
+}
+
+function parse2(string, markups) {
+  // place the opening and closing tags at the appropriate indexes
+  const fragments = markups.reduce(
+    (chars, [start, end, tag]) => {
+      chars[start] = `<${tag}>` + chars[start];
+      chars[end] += `</${tag}>`;
+      return chars;
+    },
+    [...string]
+  );
+
+  // pass this string to DOMParser()
+  // to convert it to HTML
+  return new DOMParser().parseFromString(fragments.join(""), "text/html").body
+    .innerHTML;
+}
+```
+
+- also use `DOMParser().parseFromString()` method it will auto close the appropriate tags for us.
