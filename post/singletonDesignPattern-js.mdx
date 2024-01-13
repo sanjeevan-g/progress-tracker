@@ -1,0 +1,61 @@
+---
+title: "Singleton Pattern in javascript"
+publishedAt: "2024-1-13"
+updatedAt: "2024-1-13"
+tags:
+  - Javscript
+  - Machine Coding
+  - Design Pattern
+---
+
+In `Singleton` pattern, class or function are instantiated ( create instance ) only once and used globally throughout the application.
+
+it hepls to reduce memory space, because of new object instance creation.
+
+## code
+
+```js
+// need to create single instance of counter function
+function Counter() {
+  this.count = 0;
+
+  this.increment = () => {
+    this.count++;
+  };
+
+  this.decrement = () => {
+    this.count++;
+  };
+}
+
+let counter1 = new Counter();
+let counter2 = new Counter();
+console.log(counter1 === counter2); // false, we have created 2 different instances
+
+let Singleton = (() => {
+  let instance;
+
+  return {
+    getInstance: () => {
+      if (!instance) {
+        instance = new Counter();
+      }
+      return instance;
+    },
+  };
+})();
+
+let singletonCounter1 = Singleton.getInstance();
+let singletonCounter2 = Singleton.getInstance();
+
+console.log(singletonCounter1 === singletonCounter2); // true
+```
+- we used [IIFE](https://developer.mozilla.org/en-US/docs/Glossary/IIFE) function to create closures to hold instance reference and return same instance when we call this function.
+- `getInstance()` method return instance of `Counter()` object.
+
+## cons of using this patterns
+
+- Unexpected behaviours when some function update this object properties.
+- can use normal regular objects instead 
+
+reference: [Singleton design pattern](https://www.patterns.dev/vanilla/singleton-pattern)
