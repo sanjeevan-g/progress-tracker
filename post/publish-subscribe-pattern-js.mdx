@@ -1,0 +1,176 @@
+---
+title: "Publisher Subscriber ( Observer ) Pattern in javascript"
+publishedAt: "2024-1-14"
+updatedAt: "2024-1-14"
+tags:
+  - Javscript
+  - Machine Coding
+  - Design Pattern
+---
+
+In this pattern, we subscribe to certain events, whenever the event occurs, all the Subscribers are notified.
+
+We will be creating a `Event` class that has following functions
+
+- subscribe(name, callback)
+  - this function accepts the event name to subscribe and callback fn, which will be called when the event occurs.
+  - this also return { 'remove()' } function to unsubscribe from the event.
+- publish(name, data)
+  - this function will accepts event name and data, this will execute the callbacks subscribed for the event with given data.
+- publishAll(data)
+  - this will execute all the callbacks subscribed to all the events
+- subscribeOnce(name, callback)
+  - this is similar to subscribe, but it will be execute only once. after that it will be removed from memory
+- subscribeOnceAsync(name)
+  - this is an async function return a promise, which will be resolved only after the publish call
+  - callbacks are attached to this function using `.then()` methods.
+
+## Full Code
+
+```js
+// will create new Object for Event function, functions can subscribe to specific events based on name
+// on event publish, will be notified to subscribers
+function Event() {
+  this.subscriptionList = new Map(); // to hold subscribe function based on event name
+
+  this.subscriptionOnceList = new Map(); // hold one time subscriber based on event name
+
+  this.subscribeOnceAsyncList = new Map(); // hold array of resolve function based on event name
+
+  this.subscribe = function (name, callback) {
+    if (!this.subscriptionList.has(name)) {
+      this.subscriptionList.set(name, [callback]);
+    } else {
+      let existingCallback = this.subscriptionList.get(name);
+      this.subscriptionList.set(name, [...existingCallback, callback]);
+    }
+
+    // subscribe also return object, with remove function to remove subscription (unsubscribe)
+
+    return {
+      remove: () => {
+        const existingCallback = this.subscriptionList.get(name);
+        const filtered = existingCallback.filter((e) => e != callback);
+        this.subscriptionList.set(name, filtered);
+      },
+    };
+  };
+
+  this.subscribeOnce = function (name, callback) {
+    if (!this.subscriptionOnceList.has(name)) {
+      this.subscriptionOnceList.set(name, [callback]);
+    } else {
+      let existingCallback = this.subscriptionOnceList.get(name);
+      this.subscriptionOnceList.set(name, [...existingCallback, callback]);
+    }
+
+    // no need to return remove function, as we will remove after first publish
+  };
+
+  this.subscribeOnceAsync = async function (name) {
+    return new Promise((resolve, reject) => {
+      if (!this.subscribeOnceAsyncList.has(name)) {
+        this.subscribeOnceAsyncList.set(name, [resolve]);
+      } else {
+        const existingResolvefn = this.subscribeOnceAsyncList.get(name);
+        this.subscribeOnceAsyncList.set(name, [...existingResolvefn, resolve]);
+      }
+    });
+  };
+
+  this.publish = function (name, data) {
+    const callbacks = this.subscriptionList.get(name) || [];
+
+    callbacks.forEach((e) => e(data));
+
+    const subscribeOnceCallback = this.subscriptionOnceList.get(name) || [];
+
+    subscribeOnceCallback.forEach((e) => e(data));
+    // delete the callbacks after first publish
+    this.subscriptionOnceList.set(name, []);
+
+    const subscribeOnceAsyncCallbacks =
+      this.subscribeOnceAsyncList.get(name) || [];
+
+    subscribeOnceAsyncCallbacks.forEach((e) => e(data));
+    this.subscribeOnceAsyncList.set(name, []);
+  };
+
+  this.publishAll = function (data) {
+    const entries = this.subscriptionList.entries();
+    // key => event name, value => array of callbacks
+    for (let [key, value] of entries) {
+      value.forEach((e) => e(data));
+    }
+  };
+}
+
+const events = new Event();
+
+const newUserNewsSubscription = events.subscribe(
+  "new-user",
+  function (payload) {
+    console.log(`Sending Q1 News to: ${payload}`);
+  }
+);
+
+events.publish("new-user", "Jhon");
+// output: Sending Q1 News to: Jhon
+
+const newUserNewsSubscription2 = events.subscribe(
+  "new-user",
+  function (payload) {
+    console.log(`Sending Q2 News to: ${payload}`);
+  }
+);
+
+events.publish("new-user", "Doe");
+// output
+// Sending Q1 News to: Doe
+// Sending Q2 News to: Doe
+
+newUserNewsSubscription.remove(); // removed first subscription
+events.publish("new-user", "Foo");
+// output: Sending Q2 News to: Foo
+
+const newUserNewsSubscription3 = events.subscribe(
+  "publishAll-tester",
+  function (payload) {
+    console.log(`Sending Q3 News to: ${payload}`);
+  }
+);
+// publishAll will publish or pass data to all events subscribers
+
+events.publishAll("FooBar");
+// output
+// Sending Q2 News to: FooBar
+// Sending Q3 News to: FooBar
+
+// subscribeOnce will pass data only once when we publish data, and remove subscription list
+
+events.subscribeOnce("test subs once", function (payload) {
+  console.log(`I am invoked once ${payload}`);
+});
+
+events.publish("test subs once", "Foo Once");
+// I am invoked once Foo Once
+events.publish("test subs once", "Foo Twice");
+// no outputs
+
+console.log("subscribeOnceAsync below");
+// subscribeOnceAsync
+// this function will return a promise, it will resolve only after we publish the event
+// we will cal the callback after the event resolved using .then
+// this function takes name only
+events.subscribeOnceAsync("test async").then(function (payload) {
+  console.log(`I am invoked once ${payload}`);
+});
+
+events.publish("test async", "Foo Once Async");
+// I am invoked once Foo Once Async
+```
+
+# Note
+1. in subscribe method, we `return an object with remove function`.
+    - `remove: () => {}` remove is a arrow function, because in arrow function `this` maps `to parent object (Event object)` 
+    - if we used `function()` instead then `this.subscriptionList` would be undefined, because `this` maps to returned object which is `{ remove: function()... }`.
