@@ -1,0 +1,190 @@
+---
+title: "pagination in react with search product"
+publishedAt: "2024-1-16"
+updatedAt: "2024-1-16"
+tags:
+  - React
+  - Pagination
+  - Machine Coding
+---
+
+there are 2 different ways to do pagination
+
+- fetch all the data then `slice` the totalData
+- fetch data based on `pageNo` and `skip`.
+
+### Search
+
+- Search is same as what we did in blog app
+- filter the products with queryString, find all products with title `includes` queryStr.
+
+## full code
+
+```jsx
+import React, { useState, useEffect } from "react";
+import "./style.css";
+
+/* 
+2 different approch
+ 1 -> load all the data then splice the array based on pageNo and itemPerPage
+ 2 -> load only that particular data using api's skip and limit
+*/
+
+export default function App() {
+  const [pageNo, setPageNo] = useState(1);
+  const [products, setProducts] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [queryStr, setQueryStr] = useState("");
+
+  const Per_Page_Count = 10;
+
+  // now calculate startInd, endInd
+  const startInd = (pageNo - 1) * Per_Page_Count;
+  const endInd = pageNo * Per_Page_Count;
+
+  // 1
+  // const perPageProducts = products.slice(startInd, endInd);
+
+  // let queryData = perPageProducts.filter((data) => {
+  //   return (
+  //     queryStr.length == 0 ||
+  //     data.title.toLowerCase().includes(queryStr.toLowerCase())
+  //   );
+  // });
+
+  // 2
+  let queryData = products.filter((data) => {
+    return (
+      queryStr.length == 0 ||
+      data.title.toLowerCase().includes(queryStr.toLowerCase())
+    );
+  });
+
+  async function fetchAllProducts() {
+    try {
+      let res = await fetch("https://dummyjson.com/products?limit=100");
+      let data = await res.json();
+      setProducts(data.products);
+      setTotal(Math.ceil(data.total / Per_Page_Count));
+    } catch (e) {
+      console.log("Error while fetching the data", e);
+    }
+  }
+
+  async function fetchPageProducts() {
+    try {
+      let res = await fetch(
+        `https://dummyjson.com/products?limit=${Per_Page_Count}&skip=${startInd}`
+      );
+      let data = await res.json();
+      setProducts(data.products);
+      setTotal(Math.ceil(data.total / Per_Page_Count));
+    } catch (e) {
+      console.log("Error while fetching the data", e);
+    }
+  }
+
+  function handleSelectPage(selectedPageNo) {
+    if (selectedPageNo > 0 && selectedPageNo <= total) {
+      setPageNo(selectedPageNo);
+    }
+  }
+
+  // runs after page got mounted
+  //1.
+  // useEffect(() => {
+  //   fetchAllProducts();
+  // }, []);
+
+  // 2
+  useEffect(() => {
+    fetchPageProducts();
+  }, [pageNo]);
+
+  return (
+    <div className="App">
+      <h1>Product Page</h1>
+
+      <div className="search">
+        <label htmlFor="searchInp" className="">
+          Search Product{" "}
+        </label>
+        <input
+          id="searchInp"
+          value={queryStr}
+          onChange={(e) => {
+            setQueryStr(e.target.value);
+          }}
+        />
+      </div>
+
+      <div>
+        {queryData.length > 0 && (
+          <div className="products__wrap">
+            {queryData.map((product) => {
+              return (
+                <Product
+                  key={product.id}
+                  title={product.title}
+                  imgUrl={product.thumbnail}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <Pagination
+        noOfPage={total}
+        handleSelectPage={handleSelectPage}
+        pageNo={pageNo}
+      />
+    </div>
+  );
+}
+
+function Product({ title, imgUrl }) {
+  return (
+    <div className="product">
+      <img src={imgUrl} alt={title} />
+      <span>{title}</span>
+    </div>
+  );
+}
+
+function Pagination({ noOfPage, handleSelectPage, pageNo }) {
+  return (
+    <div className="pagination">
+      <span
+        style={{ color: "deepskyblue" }}
+        onClick={() => handleSelectPage(pageNo - 1)}
+        className={`${pageNo > 1 ? "" : "pagination__disabled"}`}
+      >
+        ◀
+      </span>
+      {[...new Array(noOfPage)].map((_, i) => {
+        return (
+          <span
+            key={i}
+            className={pageNo === i + 1 ? "pagination__active" : ""}
+            onClick={() => handleSelectPage(i + 1)}
+          >
+            {i + 1}
+          </span>
+        );
+      })}
+      <span
+        style={{ color: "deepskyblue" }}
+        onClick={() => handleSelectPage(pageNo + 1)}
+        className={`${pageNo < noOfPage ? "" : "pagination__disabled"}`}
+      >
+        ▶
+      </span>
+    </div>
+  );
+}
+```
+
+final code in [stackbliz link](https://stackblitz.com/edit/stackblitz-starters-2ekulv?file=src%2FApp.js)
+
+live app [link](https://stackblitz-starters-2ekulv.stackblitz.io)
