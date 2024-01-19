@@ -1,0 +1,83 @@
+---
+title: "Proxy design pattern in JavaScript"
+publishedAt: "2024-1-19"
+updatedAt: "2024-1-19"
+tags:
+  - JavaScript
+  - Machine Coding
+  - Design Pattern
+  - Proxy
+  - Reflect.set()
+  - Reflect.get()
+---
+
+## Proxy
+
+Proxy is the concept of doing things via an intermediatory, for example, if you want to change something in the original source, you hand your changes to your proxy which can do all sorts of validations on it to make sure only legit things are passed and then it forwards to the original source.
+
+With this proxy's we can see what values are passed and what values are retured to the object.
+
+If we are updating the proxy obj, `orginal object will be updated too`.
+
+## Full code
+
+```js
+let obj = {
+  name: "sanjeevan",
+  age: 18,
+};
+
+// lets create Proxy for this obj
+// 2nd parameter is the handler
+let proxyObj = new Proxy(obj, {
+  // gets 2 parameters target obj , property of the get
+  // if the property is not defined then it will return null instead of undefined
+  get(target, props) {
+    return props in target ? Reflect.get(target, props) : null;
+  },
+
+  // we can validate the input before setting the value to the property
+  set(target, props, value) {
+    if (props === "name" && typeof value !== "string") {
+      throw new TypeError("Name has to be a string");
+    }
+
+    if (props === "age") {
+      if (isNaN(value)) {
+        throw new Error("Invalid age value");
+      }
+      if (value < 10) {
+        throw new Error("age value has to be more than 10");
+      }
+    }
+
+    // if no errors
+    // set the value to obj
+    Reflect.set(target, props, value);
+
+    // indicate success
+    return true;
+  },
+});
+
+console.log(proxyObj.someProp); // null
+console.log(obj.someProp); // undefined
+
+// proxyObj.age = "aa" // Uncaught Error: Invalid age value
+// proxyObj.age = 8 // Error: age value has to be more than 10
+proxyObj.age = 109;
+
+console.log(proxyObj.age); // 109
+console.log(obj.age); // 109,  orginal obj is also updated
+```
+
+- `Proxy` accepts 2 arguments `obj` and `Handler obj`
+- `Handler obj` has lot of methods, but most common are `get()` and `set()`
+- `get` receives 2 arguments, target Obj and property we accessing
+- `set` receives 3 arguments, target Obj, property we setting and value we set
+
+## Reflect
+
+Reflect has two methods, `get()` and `set()` using which we can get or set values from the given target.
+
+Reference: [mdn link](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
