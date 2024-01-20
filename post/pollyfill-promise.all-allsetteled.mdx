@@ -1,0 +1,124 @@
+---
+title: "Pollyfill for Promise.all() and Promise.allSetteled()"
+publishedAt: "2024-1-20"
+updatedAt: "2024-1-20"
+tags:
+  - JavaScript
+  - Machine Coding
+  - Pollyfill
+  - async function
+---
+
+## Promise.all()
+
+Promise.all() function accepts array of promises or array of async function, and return new `Promise`.
+will resolve only if all input promises are resolved else reject on first rejection.
+
+## Promise.allSetteled()
+
+Promise.all() function accepts array of promises or array of async function, and return new `Promise`.
+will resolve after all input promises are setteled (eother resolved or rejected).
+resolves with array of results of given promises.
+
+## code
+
+```js
+const generateAsyncFunction = (resolveDefault = false) => {
+  let randValue = Math.floor(Math.random() * 5);
+
+  return new Promise((res, rej) => {
+    setTimeout(() => {
+      if (resolveDefault) res(randValue);
+      if (randValue < 3) rej(`Error with value ${randValue}`);
+      else res(randValue);
+    }, randValue * 1000);
+  });
+};
+
+// promiseAll() will return a promise, resolve after all the promises are resolved or rejected
+// return arr of results
+
+const promiseAllSettled = (asyncList) => {
+  return new Promise((resolve, reject) => {
+    let totalCount = asyncList.length;
+
+    let resolveCount = 0;
+
+    let result = [];
+
+    asyncList.forEach(async (asyncFn, i) => {
+      try {
+        let resolveValue = await asyncFn;
+        result[i] = resolveValue;
+      } catch (e) {
+        result[i] = e;
+      } finally {
+        resolveCount++;
+        if (resolveCount == totalCount) resolve(result);
+      }
+    });
+  });
+};
+
+// resolve only if all the promises are resolved else reject with first rejected promise value
+const promiseAll = (asyncList) => {
+  return new Promise((resolve, reject) => {
+    let totalCount = asyncList.length;
+
+    let resolveCount = 0;
+
+    let result = [];
+
+    asyncList.forEach(async (asyncFn, i) => {
+      try {
+        let resolveValue = await asyncFn;
+        resolveCount++;
+
+        result[i] = resolveValue;
+
+        if (resolveCount === totalCount) resolve(result);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  });
+};
+
+let asyncList = [
+  generateAsyncFunction(),
+  generateAsyncFunction(),
+  generateAsyncFunction(),
+  generateAsyncFunction(),
+];
+
+let asyncList2 = [
+  generateAsyncFunction(true),
+  generateAsyncFunction(true),
+  generateAsyncFunction(true),
+  generateAsyncFunction(true),
+];
+
+let asyncList3 = [
+  generateAsyncFunction(),
+  generateAsyncFunction(),
+  generateAsyncFunction(),
+  generateAsyncFunction(),
+];
+promiseAllSettled(asyncList).then((res) => console.log(res)); // line 104
+
+// no reject here
+promiseAll(asyncList2)
+  .then((res) => console.log(res))
+  .catch((error) => console.log(error)); // line 107
+
+// catch function may run if reject occur
+promiseAll(asyncList3)
+  .then((res) => console.log(res))
+  .catch((error) => console.log(error)); // line 110
+
+/*
+    Day68-pollyfill-Promise.allSettled-js/:110 Error with value 0
+    Day68-pollyfill-Promise.allSettled-js/:107 (4) [2, 2, 1, 1]
+    Day68-pollyfill-Promise.allSettled-js/:104 (4) [4, 'Error with value 0', 4, 4]
+*/
+```
