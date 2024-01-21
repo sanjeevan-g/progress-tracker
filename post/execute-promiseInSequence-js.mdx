@@ -1,0 +1,67 @@
+---
+title: "Execute async function in sequence in JavaScript"
+publishedAt: "2024-1-21"
+updatedAt: "2024-1-21"
+tags:
+  - JavaScript
+  - Machine Coding
+  - async function
+  - try catch
+---
+
+we are given with array of `async functions on execution returns a promise`, we have to execute this async fns in sequence order
+after execution we need to run the callback function with results `callback(results , errors)`.
+
+## code
+
+```js
+// will return a function which returns a promise
+const asyncFuncTemplate = () => {
+  let randomValue = Math.floor(Math.random() * 5);
+
+  return () => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (randomValue < 2) {
+          reject(`Invalid random value ${randomValue}`);
+        }
+        resolve(randomValue);
+      }, randomValue * 1000);
+    });
+  };
+};
+
+let asyncTasks = [...new Array(5)].map(() => asyncFuncTemplate());
+
+// asyncSequence accepts array of async fun, we have to run in sequence and
+// execute the callback after all the the async functions are executed
+asyncSequence(asyncTasks, (result, error) => {
+  console.log("resolved", result);
+  console.log("rejected", error);
+});
+
+async function asyncSequence(asyncTasks, callback) {
+  // init 2 different arrays to hold the resolved and rejected values
+  let results = [];
+  let errors = [];
+
+  for (let task of asyncTasks) {
+    try {
+      let res = await task(); // execute the task
+      results.push(res);
+    } catch (error) {
+      errors.push(error);
+    }
+  }
+
+  callback(results, errors);
+}
+//output
+/*
+resolved (4) [4, 2, 4, 3]
+rejected ['Invalid random value 1']
+*/
+```
+
+- we used `try-catch` block inside `for-in` loop to iterate over the asyncTasks
+- after that we will call callback with results and errors.
