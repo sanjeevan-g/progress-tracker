@@ -1,0 +1,181 @@
+---
+title: "mapLimit pollyfill in JavaScript"
+publishedAt: "2024-1-22"
+updatedAt: "2024-1-22"
+tags:
+  - JavaScript
+  - Machine Coding
+  - async function
+  - reduce
+---
+
+`mapLimit` will accept:
+
+- array of inputs
+- limit - max no of operations can be performed at a time
+- iterateeFn - this fn accepts input value and callback
+  - after processing, iterateeFn function will call this callback with `processedValue`
+
+there are 2 approach to do this:
+
+## 1 first approach
+
+- split the inputs into array of smaller inputs with array size of limit(`batch`). for limit of 2
+  - `(1,2,3,4,5) => ((1,2) , (3,4), (5))`
+- process in batches
+- start next batch only after all the current batch inputs are processed.
+- inputs inside the batch runs `parallel`and batches run in `sequential`
+- `cons:` if any input is processed in current batch can't start task in next batch, next batch will `start only after current batch inputs are processed`
+
+## code
+
+```js
+// Implement mapLimit, which is a utility function that produces a list of outputs by mapping each input through an asynchronous iteratee function. The provided limit dictates how many operations can occur at once.
+
+// Inputs
+// inputs: An array of inputs.
+// limit: The maximum number of operations at any one time.
+// iterateeFn: The async function that should be called with each input to generate the corresponding output. It will have two arguments:
+//      input: The input being processed.
+//      callback: A function that will be called when the input is finished processing. It will be provided one argument, the processed output.
+// callback: A function that should be called with the array of outputs once all the inputs have been processed.
+
+// [1, 2, 3, 4, 5]
+// [[1, 2], [3, 4], [5]]
+// inputs in a single batch can be processed concurrently / parallely -> async in parallel
+// each batch will be processed sequentially -> async in sequence
+
+function getNameById(id, callback) {
+  // simulating async request
+  const randomRequestTime = Math.floor(Math.random() * 100) + 200;
+
+  setTimeout(() => {
+    callback("User" + id);
+  }, randomRequestTime);
+}
+
+// 2 approches
+
+// 1 => after first limit of task done then go for next batch of tasks
+// in this new batch will start only after prev batch finishes
+// if one task in current batch finishes we can't start new task in next batch
+
+// chop will cut the task arr into [ [t1,..tn],[t1..tn] ] array of smaller arr tasks with length of limit
+function chop(tasks, limit) {
+  let res = [];
+  let i = 0;
+
+  while (i < tasks.length) {
+    res.push(tasks.slice(i, i + limit));
+    i += limit;
+  }
+
+  return res;
+}
+
+function mapWithLimit(tasks, limit, iterateeFn, callback) {
+  let coppedTask = chop(tasks, limit); // [ [1,2,3] , [4,5,6], [7] ]
+
+  // iterateeFn => accepts task and callback, processed values will be passes throught that callback
+
+  // we will use promise method here to but we can use try catch inside for-in loop by making fn async
+
+  let finalResult = coppedTask.reduce((prevRes, curTask) => {
+    return new Promise((resolve, reject) => {
+      prevRes.then((value) => {
+        // value => values of previous batch
+
+        // iterate current batch tasks
+        let temp = [];
+        curTask.forEach((task) => {
+          iterateeFn(task, (newValue) => {
+            // push new value to temp
+            temp.push(newValue);
+            // processed current batch
+            if (temp.length === curTask.length) {
+              resolve([...value, ...temp]);
+            }
+          });
+        });
+      });
+    });
+  }, Promise.resolve([])); // resolved wit empty arr
+
+  // finalResult is an promise that will be fulfilled with final result
+
+  finalResult.then((value) => callback(value));
+}
+
+mapWithLimit([1, 2, 3, 4, 5, 6, 7], 3, getNameById, (result) => {
+  console.log(result);
+});
+// (7) ['User3', 'User1', 'User2', 'User6', 'User5', 'User4', 'User7']
+
+// batches are called sequential
+// but tasks in batches are executed parallel
+```
+
+- `array.reduce` method accepts `prevPromise` and `currentBatch` and after promise, will be resolved with `prevResult + currentResult`.
+- we chained the batches using `.then()` so after current batch resolved, next batch will be start.
+
+## 2nd approach:
+
+- initially start with `limit no of inputs` after one input processed, start with next one in the given array.
+- at each point only `limit` no of task will be processed.
+- no need to wait for other process
+
+## code
+
+```js
+function getNameById(id, callback) {
+  // simulating async request
+  const randomRequestTime = Math.floor(Math.random() * 100) + 200;
+
+  setTimeout(() => {
+    callback("User" + id);
+  }, randomRequestTime);
+}
+// 2nd option
+// initially limit no of functions will be executed, if any of the function completed start the next one
+// so at any time only max limit no of task will be executed
+
+const mapWithLimit2 = (tasks, limit, iterateeFn, callback) => {
+  let count = 0; // no of tasks got completed
+
+  // to maintain same results order do some modifications
+  // tasks = tasks.map((value, index) => ({value , index}) )
+
+  let initialTasks = tasks.slice(0, limit);
+
+  let res = [];
+
+  let nextTask = 0; // points to next task to start
+
+  function run(task, curInd) {
+    iterateeFn(task, (processedValue) => {
+      res[curInd] = processedValue;
+      count++; // increment completed task count
+
+      // now one task is completed
+      // check if any task left
+      if (nextTask < tasks.length) {
+        run(tasks[nextTask], nextTask++);
+      }
+
+      // we are using count because we never know when will task will completed
+      // if last task is completed before the prev then we need to wait for prev task to finish
+      // so count will give as how many tasks are completed
+      if (count === tasks.length) {
+        callback(res);
+      }
+    });
+  }
+
+  initialTasks.forEach((task) => run(task, nextTask++));
+};
+mapWithLimit2([1, 2, 3, 4, 5, 6, 7], 3, getNameById, (result) => {
+  console.log(result);
+});
+// here index is maintained in final result
+// (7) ['User1', 'User2', 'User3', 'User4', 'User5', 'User6', 'User7']
+```
