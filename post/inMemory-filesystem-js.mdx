@@ -1,0 +1,139 @@
+---
+title: "inMemory File system in javascript"
+publishedAt: "2024-1-23"
+updatedAt: "2024-1-23"
+tags:
+  - JavaScript
+  - Machine Coding
+  - Objects
+---
+
+Create a in memory `FileSystem` which hold current directory in memory and has following methods
+
+- createDirectory(name) Creates a new directory at the current path.
+- changeDirectory(path) Changes the directory path
+- addFile(name) Adds a new file at the current path.
+- deleteFile(name) Deletes the file with given name at the current path.
+- deleteDirectory(name) Deletes the directory with given name at the given path.
+- getRootDirectory Returns the root directory and all its nested childs.
+- getCurDirectory Returns the items of current directory.
+- getCurDirectoryPath Returns the path of the current directory.
+
+We use `Objects` to create the FileSystem.
+
+```js
+this.directory = { root: {} };
+
+this.currentDirectory = this.directory["root"];
+this.currentDirectoryPath = "root";
+```
+
+we use this 3 properties to hold rootDir, currentDirectory and currentDirectoryPath.
+
+## full code
+
+```js
+/*
+our file system must have these following functions
+we use objects here to show the filesystem
+*/
+function FileSystem() {
+  this.directory = { root: {} };
+
+  this.currentDirectory = this.directory["root"];
+  this.currentDirectoryPath = "root";
+
+  this.createDirectory = (name) => {
+    // create new dir in current directory
+    this.currentDirectory[name] = {};
+  };
+  // path => absolute path seperated by '-'
+  this.changeDirectory = (path) => {
+    this.currentDirectory = this.changeDirectoryHelper(path);
+    this.currentDirectoryPath = path;
+  };
+
+  // this will return
+  this.changeDirectoryHelper = (path) => {
+    let paths = path.split("-");
+
+    let current = this.directory;
+
+    for (let key of paths) {
+      // if key not present
+      if (!current[key]) current[key] = {};
+      current = current[key];
+    }
+
+    return current;
+  };
+
+  this.addFile = function (name) {
+    if (this.currentDirectory.files) {
+      this.currentDirectory.files.push(name);
+    } else {
+      this.currentDirectory.files = [name];
+    }
+
+    return true;
+  };
+
+  this.deleteFile = function (name) {
+    if (this.currentDirectory.files) {
+      this.currentDirectory.files = this.currentDirectory.files.filter(
+        (item) => item !== name
+      );
+      return true;
+    }
+  };
+
+  this.deleteDirectory = function (name) {
+    delete this.currentDirectory[name];
+  };
+
+  this.getRootDirectory = () => this.directory;
+
+  this.getCurDirectory = () => {
+    this.currentDirectory;
+  };
+
+  this.getCurDirectoryPath = () => this.currentDirectoryPath;
+}
+
+const dir = new FileSystem();
+dir.createDirectory("prashant");
+dir.changeDirectory("root-prashant");
+dir.addFile("index.html");
+dir.addFile("app.js");
+dir.changeDirectory("root");
+dir.createDirectory("practice");
+dir.changeDirectory("root-practice");
+dir.addFile("index.html");
+dir.addFile("app.js");
+dir.createDirectory("build");
+dir.changeDirectory("root-practice-build");
+dir.addFile("a.png");
+dir.addFile("b.png");
+dir.deleteFile("a.png");
+dir.changeDirectory("root");
+dir.deleteDirectory("prashant");
+console.log(dir.getRootDirectory());
+
+/*
+{
+    "root": {
+        "practice": {
+            "files": [
+                "index.html",
+                "app.js"
+            ],
+                "build": {
+                "files": [
+                    "b.png"
+                ]
+            }
+        }
+    }
+}
+*/
+```
