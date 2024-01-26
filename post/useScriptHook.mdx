@@ -1,0 +1,109 @@
+---
+title: "Implement useScript() Hook in React"
+publishedAt: "2024-1-26"
+updatedAt: "2024-1-26"
+tags:
+  - React
+  - CustomHook
+  - useEffect
+---
+
+Dynamically load an external script in one line with this React hook.
+This can be useful to integrate a third party library like Google Analytics or Stripe.
+
+We don't need to load the external script before page loads which are not required initially or only neaded in few components.
+
+`useScript(src)` hook accepts script src as param and return script status
+
+- idle - script tag not added or when src is invalid
+- loading - script tag is added or script is currently loading
+- ready - script tag is successfully loaded
+- error - error in loading script from src.
+
+## full code - useScript() hook
+
+```jsx
+import { useEffect, useState } from "react";
+
+// there are 4 status possible
+// idle => script tag not added yet
+// loading => script tag added, in loading
+// ready => script added and loaded success
+// error => error in loading the script
+export const useScript = (src) => {
+  const [status, setStatus] = useState(src ? "loading" : "idle");
+
+  useEffect(() => {
+    // base case
+    if (!src) {
+      // console.log("undefined")
+      setStatus("idle");
+      return;
+    }
+    // check the script tag is already added by other instance of this hook
+
+    let scriptNode = document.querySelector(`script[src="${src}"]`);
+
+    // script node already present
+    if (scriptNode) {
+      setStatus(scriptNode.getAttribute("data-status"));
+    } else {
+      // add new script tag
+      scriptNode = document.createElement("script");
+      scriptNode.src = src;
+      scriptNode.async = true;
+      scriptNode.setAttribute("data-status", "loading");
+
+      //add script tag to body
+      document.body.appendChild(scriptNode);
+
+      // sets the data-status to the script tag
+      const setStatusFromEvent = (event) => {
+        scriptNode.setAttribute(
+          "data-status",
+          event.type === "load" ? "ready" : "error"
+        );
+      };
+
+      scriptNode.addEventListener("load", setStatusFromEvent);
+      scriptNode.addEventListener("error", setStatusFromEvent);
+    }
+
+    const setStateFromEvent = (event) => {
+      setStatus(event.type === "load" ? "ready" : "error");
+    };
+
+    // we have to add this event listener even if script tag already present
+    // this event handlers belongs to 'this' instance
+    scriptNode.addEventListener("load", setStateFromEvent);
+    scriptNode.addEventListener("error", setStateFromEvent);
+
+    // cleanup
+    return () => {
+      scriptNode.removeEventListener("load", setStateFromEvent);
+      scriptNode.removeEventListener("error", setStateFromEvent);
+    };
+  }, [src]);
+
+  return status;
+};
+```
+
+## App.jsx
+
+```jsx
+import { useScript } from "./useScript";
+
+function App() {
+  const status = useScript(
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+  );
+  return <div>{status}</div>;
+}
+
+export default App;
+```
+
+we will show the status in App
+
+[repo link](https://stackblitz.com/edit/vitejs-vite-hgsf61?file=src%2FApp.jsx)
