@@ -1,0 +1,106 @@
+---
+title: "Implement useIdle() Hook in React"
+publishedAt: "2024-1-27"
+updatedAt: "2024-1-27"
+tags:
+  - React
+  - CustomHook
+  - useEffect
+---
+
+`useIdle()` hook returns boolean value based on user active or inactive.
+
+is user active or inactive based on following events `mousemove`, `mousedown`, `keypress`, `DOMMouseScroll`, `mousewheel`, `touchmove`, `MSPointerMove` and user `switched tab` or not.
+
+## useIdle code
+
+```js
+import { useEffect, useRef, useState } from "react";
+
+export const useIdle = (delay) => {
+  const [isIdle, setIsIdle] = useState(false);
+
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    //  init the timer after mount
+    startTimer();
+
+    setup(); // add eventListeners
+
+    return () => {
+      cleanUp(); // remove eventListeners
+    };
+  }, [delay]);
+
+  // two actions we can make
+
+  const startTimer = () => {
+    timerRef.current = setTimeout(goInactive, delay);
+  };
+
+  const goActive = () => {
+    setIsIdle(false);
+
+    // start the timer again
+    startTimer();
+  };
+
+  const goInactive = () => {
+    setIsIdle(true);
+  };
+
+  // make idle false
+  function handleEvent() {
+    // clear prev timer
+    clearTimeout(timerRef.current);
+    goActive(); // reset
+  }
+
+  // on moving to next tab
+  function handleVisibility() {
+    // clear prev timer
+    clearTimeout(timerRef.current);
+
+    startTimer(); // set inactive after delay time
+  }
+
+  function setup() {
+    document.addEventListener("mousemove", handleEvent, false);
+    document.addEventListener("mousedown", handleEvent, false);
+    document.addEventListener("keypress", handleEvent, false);
+    document.addEventListener("DOMMouseScroll", handleEvent, false);
+    document.addEventListener("mousewheel", handleEvent, false);
+    document.addEventListener("touchmove", handleEvent, false);
+    document.addEventListener("MSPointerMove", handleEvent, false);
+
+    //edge case
+    //if tab is changed or is out of focus
+    // wait for delay time and make state idle
+    window.addEventListener("blur", handleVisibility, false);
+    window.addEventListener("focus", handleEvent, false);
+  }
+
+  function cleanUp() {
+    // clear existing timeout
+    clearTimeout(timerRef.current);
+
+    document.removeEventListener("mousemove", handleEvent);
+    document.removeEventListener("mousedown", handleEvent);
+    document.removeEventListener("keypress", handleEvent);
+    document.removeEventListener("DOMMouseScroll", handleEvent);
+    document.removeEventListener("mousewheel", handleEvent);
+    document.removeEventListener("touchmove", handleEvent);
+    document.removeEventListener("MSPointerMove", handleEvent);
+
+    //edge case
+    //if tab is changed or is out of focus
+    window.removeEventListener("blur", handleVisibility);
+    window.removeEventListener("focus", handleEvent);
+  }
+
+  return isIdle;
+};
+```
+
+[repo link](https://stackblitz.com/edit/vitejs-vite-w9q8fd?file=src%2FuseIdle.js)
