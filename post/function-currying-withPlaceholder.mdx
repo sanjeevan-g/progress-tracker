@@ -1,0 +1,135 @@
+---
+title: "function currying with placeholder support javascript"
+publishedAt: "2024-2-1"
+updatedAt: "2024-2-1"
+tags:
+  - Javascript
+  - currying
+  - symbol
+  - Machine coding
+---
+
+## Symbol
+
+Symbols are a primitive data type in JavaScript, like number, boolean, or null.
+They're often used to avoid property name conflicts, or to simulate private values on JavaScript objects.
+
+Symbol always provides unqiue values. if they are used a obj property then they are excluded from iteration
+which make that obj[Symbol(key)] as private
+
+## What is function currying
+
+curry function will accepts a callback function and returns another function utill it gets all its arguments. after that it return the callback function result.
+
+using function currying we can pass arguments is multiple ways.
+
+```js
+let curryFn = curry(fn);
+curryFn(1)(2)(3)
+curryFn(1)(2)()(3)
+curryFn(1,2)(3)
+...
+```
+
+## currying with placeholder support.
+
+`placeholder` here placeholder is a special `symbol` we pass in place of arguments and later arguments will replace this placeholder with actual value.
+
+```js
+curriedJoin(_, 2)(1, 3);
+// above will be considered as
+curriedJoin(1, 2)(3);
+```
+
+in first argument we passed `_` it will be replace by `1` from next batch of arguments.
+
+`in some cases placeholders are replaced by another placeholder`
+
+```js
+curriedJoin(_, _, _)(1)(_, 3)(2);
+// here 1 will be placed in 1 argument
+curriedJoin(1, _, _)(_, 3)(2);
+// now 2nd spot `_` is replaced by next argument 1st spot `_`,
+// and 3rd spot `_` is replaced by next argument 2nd spot 3
+curriedJoin(1, _, 3)(2);
+// now 2nd spot `_` is replaced by next argument 1st spot 2
+curriedJoin(1, 2, 3);
+```
+
+## init code
+
+```js
+curry.placeholder = Symbol();
+
+const join = (a, b, c) => {
+  return `${a}_${b}_${c}`;
+};
+
+const curriedJoin = curry(join);
+const _ = curry.placeholder;
+
+console.log(curriedJoin(1, 2, 3)); // '1_2_3'
+
+console.log(curriedJoin(_, 2)(1, 3)); // '1_2_3'
+
+console.log(curriedJoin(_, _, _)(1)(_, 3)(2)); // '1_2_3'
+```
+
+## Currying code
+
+```js
+function curry(fn) {
+  // your code here
+  // similar to prev code
+
+  return function curried(...args) {
+    // check if we reached args limit and there is no placeholder
+    let complete =
+      args.length >= fn.length &&
+      !args.slice(0, fn.length).includes(curry.placeholder);
+
+    if (complete) {
+      return fn(...args);
+    }
+    // return another fn that accepts new args and call curried again
+
+    return function (...newArgs) {
+      // replace placeholders in old args with new args
+      let res = args.map((arg) => {
+        if (arg === curry.placeholder) {
+          if (newArgs.length) return newArgs.shift();
+          else return arg;
+        }
+        return arg;
+      });
+
+      return curried(...res, ...newArgs);
+    };
+  };
+}
+
+curry.placeholder = Symbol();
+
+const join = (a, b, c) => {
+  return `${a}_${b}_${c}`;
+};
+
+const curriedJoin = curry(join);
+const _ = curry.placeholder;
+
+console.log(curriedJoin(1, 2, 3)); // '1_2_3'
+
+console.log(curriedJoin(_, 2)(1, 3)); // '1_2_3'
+
+console.log(curriedJoin(_, _, _)(1)(_, 3)(2)); // '1_2_3'
+```
+
+1. curry(fn) accepts the callback function and return another function `curried`
+
+2. `curried` accepts arguments, if arguments are completed i.e got required amount of arguments and there is `no placeholder` in arguments then return `fn(...args)`
+
+3. Else it will return another function to accepts the arguments and call the curried with old and new arguments after processing.
+
+4. we will processing the old arguments by replacing the placeholder with new items in the new arguments.
+
+5. after that pass the old and new arguments to curried fn and `repeats step2 again`.
