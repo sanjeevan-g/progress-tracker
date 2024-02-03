@@ -1,0 +1,53 @@
+---
+title: "Pollyfill for Array.flat() with depth params"
+publishedAt: "2024-2-3"
+updatedAt: "2024-2-3"
+tags:
+  - JavaScript
+  - Pollyfill
+  - Machine Coding
+---
+
+## We have to create Pollyfill for Array.prototype.flat();
+
+It must accepts array and depth value.
+
+## full code
+
+```js
+function flat(arr, depth = 1) {
+  // your imeplementation here
+
+  let res = [];
+
+  function helper(arr, curDepth) {
+    // iterate the arr
+
+    for (let item of arr) {
+      if (Array.isArray(item) && curDepth != 0) {
+        helper(item, curDepth - 1);
+      } else {
+        res.push(item);
+      }
+    }
+  }
+
+  helper(arr, depth);
+
+  return res;
+}
+
+const arr = [1, [2], [3, [4]]];
+
+console.log(flat(arr));
+
+// [1, 2, 3, [4]]
+
+console.log(flat(arr, 1));
+
+// [1, 2, 3, [4]]
+
+console.log(flat(arr, 2));
+
+// [1, 2, 3, 4]
+```
