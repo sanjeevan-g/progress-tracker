@@ -1,7 +1,7 @@
 ---
 title: "React Notes - Intermediate"
 publishedAt: "2024-2-12"
-updatedAt: "2024-2-12"
+updatedAt: "2024-2-13"
 tags:
   - React
   - Notes
@@ -9,7 +9,7 @@ tags:
 
 ## How to split up the Component
 
-We should not use `Huge Single` component which will receive many props to work or very small components 
+We should not use `Huge Single` component which will receive many props to work or very small components
 which will end up with many component and hard to understand
 
 So find balance between them.
@@ -19,3 +19,28 @@ Component should be
 - Logical Seperation
 - Some are reusable
 - low complexity with responsability
+
+## Component Category
+
+1. stateless or presentation component
+
+- has no state
+- usually small components
+- can receive props and present those data and other contents
+
+2. Stateful Component
+
+- has state
+- can be reusable
+
+3. Structural Component
+
+- pages, layouts and screens
+- composed of many components
+- Can be huge and non-reusable components
+
+## Component Composition
+
+Component Composition means combining components by using `children` props
+It makes the components highly reusable. 
+It is like creatiing a template with slots, and any other components can be placed inside that slots.
