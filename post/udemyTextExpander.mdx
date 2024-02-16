@@ -1,0 +1,62 @@
+---
+title: "udemy Text Expander"
+publishedAt: "2024-2-16"
+updatedAt: "2024-2-16"
+tags:
+  - Udemy
+  - React
+---
+
+we have to create textExpander component that accepts text as children and few props for flexiblity.
+
+## Expected props
+
+- className - for css modification
+- collapsedNumWords - no of words to show on collapsed state
+- expandButtonText
+- collapseButtonText
+- buttonColor - button color
+- expanded - default expanded state
+
+## Component code
+
+```jsx
+function TextExpander({
+  children,
+  className = "",
+  collapsedNumWords = 10,
+  expandButtonText = "show more",
+  collapseButtonText = "show less",
+  buttonColor = "blue",
+  expanded = false,
+}) {
+  const [isExpand, setIsExpand] = useState(expanded);
+
+  const buttonStyle = {
+    color: buttonColor,
+    outline: "none",
+    margin: 0,
+    padding: 0,
+    border: 0,
+    background: "none",
+    cursor: "pointer",
+    marginLeft: "6px",
+    font: "inherit",
+  };
+
+  return (
+    <div className={className}>
+      <span>
+        {isExpand
+          ? children
+          : children.split(" ").splice(0, collapsedNumWords).join(" ") + "..."}
+      </span>
+      <button style={buttonStyle} onClick={() => setIsExpand((prev) => !prev)}>
+        {isExpand ? collapseButtonText : expandButtonText}
+      </button>
+    </div>
+  );
+}
+```
+
+[Application Repo link](https://stackblitz.com/edit/vitejs-vite-ygy3e3?file=src%2FApp.jsx)
