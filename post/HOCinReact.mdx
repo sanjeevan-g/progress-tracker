@@ -1,0 +1,42 @@
+---
+title: "HOC in React"
+publishedAt: "2024-2-17"
+updatedAt: "2024-2-17"
+tags:
+  - React
+  - Design Pattern
+---
+
+Higher Order Component (HOC) is an design Pattern in react achieved using `react composition`.
+
+HOC function takes a component as an input and returns new component as result.
+
+With HOC we can create `re-usable components` where logic or common functionality stays in the one component.
+
+## Code
+
+```jsx
+import React from "react";
+
+function withLogging(WrappedComponent) {
+  return function WithLogging(props) {
+    React.useEffect(() => {
+      console.log(`Component ${WrappedComponent.name} mounted`);
+      return () => {
+        console.log(`Component ${WrappedComponent.name} unmounted`);
+      };
+    }, []);
+
+    return <WrappedComponent {...props} />;
+  };
+}
+
+// Usage
+const MyComponent = (props) => {
+  return <div>My Component</div>;
+};
+
+const EnhancedComponent = withLogger(MyComponent);
+```
+
+Here `withLogging` is an HOC that gets `MyComponent` as input and returns `WrappedComponent`, With this HOC we can find when the component is mounted and unmounted.
