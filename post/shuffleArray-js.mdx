@@ -1,0 +1,30 @@
+---
+title: "Shuffle Array with same probability in JavaScript"
+publishedAt: "2024-2-18"
+updatedAt: "2024-2-18"
+tags:
+  - JavaScript
+  - Machine Coding
+---
+
+Function `shuffle()` receives array as parameter, we have to shuffle the array inline with equal probability.
+
+Eg:
+
+for `Array.length = 4` then our answer could be in `4! = 24` different arrays order. all should be in same probability of `1/24`.
+
+We can use [Fisher–Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) algorithm to shuffling.
+
+## code
+
+```js
+function shuffle(arr) {
+  // modify the arr inline to change the order randomly
+  for (let i = arr.length - 1; i >= 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));  // random index from 0 to i
+
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+```
