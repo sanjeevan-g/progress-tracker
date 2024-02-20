@@ -1,0 +1,43 @@
+---
+title: "React Notes - Intermediate"
+publishedAt: "2024-2-20"
+updatedAt: "2024-2-20"
+tags:
+  - React
+  - Notes
+---
+
+## How components are rendered in react
+
+### Step 1: Render is triggered
+
+Re-render is triggered when state changes internally.
+
+There are 2 scenarios that triggers render:
+1. initial render of the application.
+2. State Updates (re-render)
+
+#### Note:
+- when state updates in one component, all of its children are called with component methods (render phase).
+- Renders are not triggered immediately.but scheduled by JS engine when it has 'free time' usually in ` miliseconds`
+
+### Step 2: Render Phase
+
+In this phase react calls component methods like lifecycle methods etc to figure out how to update the DOM.
+In this phase `DOM is not updated`, `Rendering is not about updating DOM or creating elements`,
+rendering happens only `inside the react internally`.
+
+1. initially React will create a `virtual DOM` which is nothing but `JS object tree of React Elements`.
+2. At rerender, React will take all the React Elements that triggered `rerender` and then `create new React Elements`.
+ this process is simple in nature, bacause Virtual DOM is just `JS Object`. 
+3. This `new Virtual DOM` along with current `React Fiber` are given as inputs to `Reconciler + diffing algo` which return `updated Fiber Tree`
+
+### Step 3: Commit
+
+After knowing how to update the DOM, Actual `DOM Updates` like 'create','delete', `update` happens in this phase.
+
+### Step 4: Browser Re-paints ( Done by browser, it is nothing to do with react)
+
+After knowing DOM is been updated, browser re-paints the screen.
+
+
