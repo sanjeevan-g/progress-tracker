@@ -1,0 +1,46 @@
+---
+title: "What is reconciliation in react and why do we need it ?"
+publishedAt: "2024-2-21"
+updatedAt: "2024-2-21"
+tags:
+  - React
+  - Notes
+  - Reconciliation
+  - React Fiber
+---
+
+## Why not to update DOM directly when state changes ?
+
+Updating DOM is not cheap and it is slow and usually only few parts of the DOM has to be updated.
+
+By use `reconciliation` react reuses existing DOM as much as possible.
+
+## Reconciliation
+
+Deciding which DOM elements needs to be updated, inserted, or deleted in order to keep DOM sync with state changes.
+
+current Reconciler is called `Fiber`.
+
+## React Fiber
+
+After initializing react takes react.element tree (virtual DOM) and create Fiber Tree. each DOM OR Element represents a Fiber.
+Unlike virtual DOM, Fiber tree is `created only once at initail render` and get mutated over and over again. Which makes perfect place to store 
+component state, props, side-effects, used hooks etc.
+
+In Fiber Tree, each `first child is linked` to is parent and all other `siblings have link to their previous sibling.` like a `linked list`.
+
+React Reconciliation is `asynchronous` which means react can render in chunks and can prioritize the import part first.
+It helps to `avoid Blocking of Browser Engine` while rendering large chunk.
+
+## Reconciliation + Diffing
+
+When state updates, react creates `new Virtual DOM`, now in Reconciliation process, react checks which part of the DOM need to be updated, inserted or deleted.
+If element is re-rendered because of parent state change, corresponding Fiber node is not updated. as result react will g`enerate list of DOM updates.`
+
+## Updating DOM
+
+Updating DOM happens in `commit phase`
+
+- `ReactDOM` is responsible for updating the DOM
+- It is synchronous, all DOM updates are done is single go, it can't be interrupted
+- After commmit phase complete, `updated Fiber (workInProgress)` become the `current Fiber tree` for next render cycle.
