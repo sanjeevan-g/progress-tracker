@@ -1,0 +1,32 @@
+---
+title: "How Diffing Works in react"
+publishedAt: "2024-2-22"
+updatedAt: "2024-2-22"
+tags:
+  - React
+  - Notes
+  - Diffing
+---
+
+Diffing works by making two assumptions
+
+1. two elements of different types will produce different trees
+
+- if different element type is found in same position then react will `destroy the element and its children along with their states`.
+
+2. Elements with stable key prop stays same across renders
+   - if same element type is found with diffrence in prop or attributes, then element and its children will be kept in the tree and state is also preserved.
+     react will mutate the attributes based on change.
+
+## With Key Props
+
+1. Element with same key prop will be kept in the tree even if it is in different position.
+   eg: adding a list `li` at first position, which makes other list item to change its position. but with `key prop` the list items are preserved.
+
+2. Element with different key will be destroyed even when they are in same position. it helps us to let react know, this is a different component
+
+## Example
+
+we have reset the `TabContent` state by adding key prop to the Tabcontent and when tab changes, key will be changed so react will render new TabContent component.
+
+[Code repo link](https://stackblitz.com/edit/vitejs-vite-wv9ien?file=src%2FApp.jsx)
