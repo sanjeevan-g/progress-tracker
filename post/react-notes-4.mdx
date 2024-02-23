@@ -1,0 +1,33 @@
+---
+title: "Rules for Rendering - React"
+publishedAt: "2024-2-23"
+updatedAt: "2024-2-23"
+tags:
+  - React
+  - Notes
+  - Rendering
+---
+
+## Two types of logic in React
+
+1. Render logic
+
+   - code that lives in top level of the component
+   - helps in describing how component view looks like
+   - will be executed each time the component is rendered
+     -Eg: `return of App.jsx`, variables that holds data etc.
+
+2. Event handling logic
+   - Executed as consequence of the event that handler is listening to like click, keypress, etc.
+   - code that performs things like state updates, fetch data, navigation etc.
+
+## Rules for Render Logic:
+
+- components must be pure i.e when we give same props then the component instance must return same result.
+
+- Render Logic must not produce any side effects like
+  1. network request
+  2. setting timers
+  3. using DOM api directly like addEventListeners, etc.
+  4. update state or ref, it will cause infinite loop
+  5. mutating data that are outside the function scope like props etc.
