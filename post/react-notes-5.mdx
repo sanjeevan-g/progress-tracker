@@ -1,0 +1,20 @@
+---
+title: "State Bashing - React"
+publishedAt: "2024-2-24"
+updatedAt: "2024-2-24"
+tags:
+  - React
+  - Notes
+  - State Updates
+---
+
+## State Bashing
+In react, state updates are `asynchronous` and the updates are bashed together.
+
+- react will not be re-rendered again and again for multiple state updates happening in the same time or in same function (event handler function).
+- updated state value are `available` only after `rerender` not on after calling `setState`
+- if we need updated state value then pass `callback fn` to the setState function.
+- setState function can be called inside `event handler, timerFn, promise etc` this all are bashed together.
+- when setting same state value again will not trigger rerender, react avoid updating state value as optimization.
+
+[Repo link](https://stackblitz.com/edit/vitejs-vite-wv9ien?file=src%2FApp.jsx)
