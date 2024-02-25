@@ -1,0 +1,70 @@
+---
+title: "Decode message problem - javascript BFE"
+publishedAt: "2024-2-25"
+updatedAt: "2024-2-25"
+tags:
+  - JavaScript
+  - BFE
+---
+
+## Problem
+
+Your are given a 2-D array of characters. There is a hidden message in it.
+
+```js
+I B C A L K A
+D R F C A E A
+G H O E L A D
+```
+
+The way to collect the message is as follows
+
+1. start at top left
+2. move diagonally down right
+3. when cannot move any more, try to switch to diagonally up right
+4. when cannot move any more, try switch to diagonally down right, repeat 3
+5. stop when cannot neither move down right or up right. the character on the path is the message
+   for the input above, `IROCLED` should be returned.
+
+## code
+
+```js
+/**
+ * @param {string[][]} message
+ * @return {string}
+ */
+function decode(message) {
+  // your code here
+
+  // base case
+  if (message.length == 0 || message[0].length == 0) return "";
+
+  let res = "";
+
+  let i = 0;
+  let j = 0;
+
+  let col = message[0].length;
+  let step = 1;
+
+  while (j < col) {
+    res += message[i][j];
+
+    // check next dir
+    if (!message[i + step]) {
+      step = step * -1;
+    }
+
+    i += step;
+    j += 1;
+  }
+  return res;
+}
+```
+
+## Note
+
+- we will stop iterating only when we reached the end of the column
+- update the state when we reach the top or bottom boundary
+
+[Code link](https://bigfrontend.dev/problem/decode-message)
