@@ -1,0 +1,30 @@
+---
+title: "How Events work in react"
+publishedAt: "2024-2-26"
+updatedAt: "2024-2-26"
+tags:
+  - JavaScript
+  - DOM
+  - events
+  - synthetic events
+---
+
+## How Events work in Browser ?
+
+when we click a button, new `Event` object is created in `root of the DOM tree`, not in the target, then the event will travel from `root` to `target`
+through the DOM nodes this is called `capture phase` after it reached the target, it will `travel back to the root` of the DOM.
+this process is called `Bubbling phase`.
+
+## How Events differ in react ?
+
+In react, instead of `native` event object, `synthetic` event object is created. synthetic event is a thin `wrapper` around the native event.
+it works constant in all browsers.
+
+In synthetic events, to stop event propagation, we need to call `e.preventDefault()`.
+
+to handle events at the `capture phase` add `Capture` at the evnt of the event i.e `onClickCapture()`
+
+## Facts:
+
+- in react, event listeners are added to `root` of the application (interally), and react maps what function to call when event occurs.
+ 
