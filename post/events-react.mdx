@@ -22,9 +22,12 @@ it works constant in all browsers.
 
 In synthetic events, to stop event propagation, we need to call `e.preventDefault()`.
 
-to handle events at the `capture phase` add `Capture` at the evnt of the event i.e `onClickCapture()`
+to handle events at the `capture phase` add `Capture` at the evnt of the event i.e `onClickCapture()`.
+
+Most synthetic events bubble exept `scroll`.
+
+events like 'focus', 'blur', 'change' bubbles in react, which are not in native events.
 
 ## Facts:
 
 - in react, event listeners are added to `root` of the application (interally), and react maps what function to call when event occurs.
- 
