@@ -1,0 +1,128 @@
+---
+title: "implement Immutability helper - BFE"
+publishedAt: "2024-2-28"
+updatedAt: "2024-2-28"
+tags:
+  - JavaScript
+  - Machine Coding
+  - recursion
+---
+
+We will be given with data that could be `array or nested object`, we have to perform
+`push (array), set (array | object), merge (object), apply (function executio)`.
+
+## Example:
+
+```js
+// push
+const arr = [1, 2, 3, 4];
+const newArr = update(arr, { $push: [5, 6] });
+// [1, 2, 3, 4, 5, 6]
+
+// set
+const state = {
+  a: {
+    b: {
+      c: 1,
+    },
+  },
+  d: 2,
+};
+
+const newState = update(state, { a: { b: { c: { $set: 3 } } } });
+/*
+{
+  a: {
+    b: {
+      c: 3
+    }
+  },
+  d: 2
+}
+*/
+
+// set array
+const arr = [1, 2, 3, 4];
+const newArr = update(arr, { 0: { $set: 0 } });
+//  [0, 2, 3, 4]
+
+// merge
+const state = {
+  a: {
+    b: {
+      c: 1,
+    },
+  },
+  d: 2,
+};
+
+const newState = update(state, { a: { b: { $merge: { e: 5 } } } });
+/*
+{
+  a: {
+    b: {
+      c: 1,
+      e: 5
+    }
+  },
+  d: 2
+}
+*/
+
+// apply
+const arr = [1, 2, 3, 4];
+const newArr = update(arr, { 0: { $apply: (item) => item * 2 } });
+// [2, 2, 3, 4]
+```
+
+## Code implementation
+
+```js
+/**
+ * @param {any} data
+ * @param {Object} command
+ */
+function update(data, command) {
+  // your code here
+  for (let [key, value] of Object.entries(command)) {
+    switch (key) {
+      // push array into another array
+      case "$push":
+        return [...data, ...value];
+
+      case "$set":
+        return value;
+
+      case "$merge":
+        if (!(data instanceof Object)) {
+          throw Error("bad merge");
+        }
+        return { ...data, ...value };
+
+      case "$apply":
+        return value(data);
+
+      default:
+        if (Array.isArray(data)) {
+          // this cause will be there on set value in array or any operation in array
+          const res = [...data];
+          res[key] = update(data[key], value);
+          return res;
+        } else {
+          return {
+            ...data,
+            [key]: update(data[key], value),
+          };
+        }
+    }
+  }
+}
+```
+
+- we have to iterate the command object to get the key (can we command or object key path)
+- if it is command then perform the command
+- else it is object key then move to data's next layer `data[key]`
+- perform above recursion till we reach `command` i.e 'push, merge, set, apply '
+- return the updated object
+
+[question link](https://bigfrontend.dev/problem/implement-Immutability-helper)
