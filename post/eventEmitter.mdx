@@ -1,0 +1,76 @@
+---
+title: "Implement event emitter - BFE"
+publishedAt: "2024-2-29"
+updatedAt: "2024-2-29"
+tags:
+  - JavaScript
+  - Machine Coding
+  - Map
+---
+
+create `Event Emitter`class that has `subscribe` and `emit` methods.
+
+`subscribe` takes (eventname, callback) as arguments. and must return object with release method.
+
+if we can pass same callback to same eventname, it must be called twice.
+
+## Example
+
+```js
+const emitter = new Emitter();
+
+const sub1 = emitter.subscribe("event1", callback1);
+const sub2 = emitter.subscribe("event2", callback2);
+
+// same callback could subscribe
+// on same event multiple times
+const sub3 = emitter.subscribe("event1", callback1);
+
+emitter.emit("event1", 1, 2);
+// callback1 will be called twice
+
+sub1.release();
+// now even if we emit 'event1' again,
+// sub3 will be called, not the sub1
+```
+
+## Code
+
+```js
+// please complete the implementation
+class EventEmitter {
+  subscribeMap = new Map();
+
+  subscribe(eventName, callback) {
+    let wrapperFn = (...args) => callback(...args);
+    if (!this.subscribeMap.has(eventName)) {
+      this.subscribeMap.set(eventName, []);
+    }
+
+    this.subscribeMap.get(eventName).push(wrapperFn);
+
+    return {
+      release: () => {
+        let fnArr = this.subscribeMap
+          .get(eventName)
+          .filter((fn) => fn != wrapperFn);
+        this.subscribeMap.set(eventName, fnArr);
+      },
+    };
+  }
+
+  emit(eventName, ...args) {
+    let callbackArr = this.subscribeMap.get(eventName) || [];
+
+    for (let cb of callbackArr) {
+      cb(...args);
+    }
+  }
+}
+```
+
+## Note
+
+- we must wrap the callback function with another function so that we can remove the function on release.
+
+[Question link](https://bigfrontend.dev/problem/create-an-Event-Emitter)

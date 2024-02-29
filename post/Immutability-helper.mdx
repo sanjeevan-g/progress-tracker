@@ -9,7 +9,7 @@ tags:
 ---
 
 We will be given with data that could be `array or nested object`, we have to perform
-`push (array), set (array | object), merge (object), apply (function executio)`.
+`push (array), set (array | object), merge (object), apply (function execution)`.
 
 ## Example:
 
@@ -119,7 +119,7 @@ function update(data, command) {
 }
 ```
 
-- we have to iterate the command object to get the key (can we command or object key path)
+- we have to iterate the command object to get the key (can be command or object key path)
 - if it is command then perform the command
 - else it is object key then move to data's next layer `data[key]`
 - perform above recursion till we reach `command` i.e 'push, merge, set, apply '

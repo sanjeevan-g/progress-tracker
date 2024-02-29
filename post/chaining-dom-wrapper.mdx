@@ -1,0 +1,40 @@
+---
+title: "DOM wrapper that supports chaining - BFE"
+publishedAt: "2024-2-29"
+updatedAt: "2024-2-29"
+tags:
+  - JavaScript
+  - Machine Coding
+  - Map
+---
+
+`$(DOMElement)` must accept html element and return object that has css method.
+
+`css(property, value)` it can be chained.
+
+```js
+$("#button")
+  .css("color", "#fff")
+  .css("backgroundColor", "#000")
+  .css("fontWeight", "bold");
+```
+
+## code
+
+```js
+function $(el) {
+  // your code here
+  return {
+    css: function (name, value) {
+      el.style[name] = value;
+      return this;
+    },
+  };
+}
+```
+
+## Note
+
+- css method must be `function` instead of `arrow fn` so that when we return `this`, it will ref to return object instead of `$fn`.
+
+[Question link](https://bigfrontend.dev/problem/implement-a-simple-DOM-wrapper-to-support-method-chaining-like-jQuery)
