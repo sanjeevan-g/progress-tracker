@@ -1,0 +1,128 @@
+---
+title: "create a fake setTimeOut function  - BFE"
+publishedAt: "2024-3-1"
+updatedAt: "2024-3-1"
+tags:
+  - JavaScript
+  - Machine Coding
+  - Map
+---
+
+setTimeOut functions adds task in to a task queue to be handled later, it is an `async` function.
+
+Can we make this setTimeOut as `sync` ??
+
+we have to modufy the setTimeOut function to store the callback function in sorted order based on time (currentTime + delay).
+
+on calling `tick()` will execute the callback function in order.
+
+modify the Date.now() to give this.currentTime;
+
+Create a `FakeTime` class which has 3 methods:
+
+1. install => it will replace setTimeOut, clearTimeout, Date.now() functions
+2. uninstall => this will restore the setTimeOut, clearTimeout, Date.now() functions back to the original
+3. tick => this will execute the callback functions
+
+```js
+class FakeTimer {
+  install() {
+    // setTimeout(), clearTimeout(), and Date.now()
+    // are replaced
+  }
+
+  uninstall() {
+    // restore the original APIs
+    // setTimeout(), clearTimeout() and Date.now()
+  }
+
+  tick() {
+    // run all the schedule functions in order
+  }
+}
+
+const fakeTimer = new FakeTimer();
+fakeTimer.install();
+
+const logs = [];
+const log = (arg) => {
+  logs.push([Date.now(), arg]);
+};
+
+setTimeout(() => log("A"), 100);
+// log 'A' at 100
+
+const b = setTimeout(() => log("B"), 110);
+clearTimeout(b);
+// b is set but cleared
+
+setTimeout(() => log("C"), 200);
+
+fakeTimer.tick();
+
+expect(logs).toEqual([
+  [100, "A"],
+  [200, "C"],
+]);
+
+fakeTimer.uninstall();
+```
+
+## Code
+
+```js
+class FakeTimer {
+  constructor() {
+    this.original = {
+      setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
+      dateNow: Date.now,
+    };
+
+    this.timerId = 0;
+    this.currentTime = 0;
+    this.queue = [];
+  }
+
+  install() {
+    // replace window.setTimeout, window.clearTimeout, Date.now
+    // with your implementation
+    window.setTimeout = (cb, delay) => {
+      const id = this.timerId++;
+      const time = this.currentTime + delay;
+      this.queue.push({ id, cb, time });
+
+      // sort the queue based on time
+      this.queue.sort((a, b) => a.time - b.time);
+
+      return id;
+    };
+
+    window.clearTimeout = (id) => {
+      this.queue = this.queue.filter((item) => item.id !== id);
+    };
+
+    Date.now = () => this.currentTime;
+  }
+
+  uninstall() {
+    // restore the original implementation of
+    // window.setTimeout, window.clearTimeout, Date.now
+    window.setTimeout = this.original.setTimeout;
+    window.clearTimeout = this.original.clearTimeout;
+    Date.now = this.original.dateNow;
+  }
+
+  tick() {
+    // run the scheduled functions without waiting
+    while (this.queue.length > 0) {
+      let { cb, time } = this.queue.shift();
+
+      this.currentTime = time;
+      cb();
+    }
+  }
+}
+```
+
+[Question Link](https://bigfrontend.dev/problem/create-a-fake-timer)
