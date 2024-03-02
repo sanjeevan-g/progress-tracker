@@ -12,7 +12,7 @@ setTimeOut functions adds task in to a task queue to be handled later, it is an 
 
 Can we make this setTimeOut as `sync` ??
 
-we have to modufy the setTimeOut function to store the callback function in sorted order based on time (currentTime + delay).
+we have to modify the setTimeOut function to store the callback function in sorted order based on time (currentTime + delay).
 
 on calling `tick()` will execute the callback function in order.
 
