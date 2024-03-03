@@ -1,0 +1,153 @@
+---
+title: "create a middleware system - BFE"
+publishedAt: "2024-3-3"
+updatedAt: "2024-3-3"
+tags:
+  - JavaScript
+  - Machine Coding
+---
+
+create a middleware system in javascript.
+
+## What is middleware ?
+
+Middleware functions are functions that have access to the request object (`req`), the response object (`res`), and the next middleware function in the application's request-response cycle.
+The next middleware function is commonly denoted by a variable named `next`.
+
+[middleware ref](http://expressjs.com/en/guide/using-middleware.html#using-middleware)
+
+```js
+type Request = object;
+
+type NextFunc = (error?: any) => void;
+
+type MiddlewareFunc = (req: Request, next: NextFunc) => void;
+
+type ErrorHandler = (error: Error, req: Request, next: NextFunc) => void;
+
+class Middleware {
+  use(func: MiddlewareFunc | ErrorHandler) {
+    // do any async operations
+    // call next() to trigger next function
+  }
+  start(req: Request) {
+    // trigger all functions with a req object
+  }
+}
+```
+
+Now we can do something similar with Express
+
+```js
+const middleware = new Middleware();
+
+middleware.use((req, next) => {
+  req.a = 1;
+  next();
+});
+
+middleware.use((req, next) => {
+  req.b = 2;
+  next();
+});
+
+middleware.use((req, next) => {
+  console.log(req);
+});
+
+middleware.start({});
+// {a: 1, b: 2}
+```
+
+Notice that use() could also accept an ErrorHandler which has 3 arguments. The error handler is triggered if next() is called with an extra argument or uncaught error happens, like following.
+
+```js
+const middleware = new Middleware();
+
+// throw an error at first function
+middleware.use((req, next) => {
+  req.a = 1;
+  throw new Error("sth wrong");
+  // or `next(new Error('sth wrong'))`
+});
+
+// since error occurs, this is skipped
+middleware.use((req, next) => {
+  req.b = 2;
+});
+
+// since error occurs, this is skipped
+middleware.use((req, next) => {
+  console.log(req);
+});
+
+// since error occurs, this is called
+middleware.use((error, req, next) => {
+  console.log(error);
+  console.log(req);
+});
+
+middleware.start({});
+// Error: sth wrong
+// {a: 1}
+```
+
+- we will get `res` object from .start function
+- the callbacks are got from `use` function.
+- we will also receive `ErrorHandler` in callbacks.
+
+## code
+
+```js
+class Middleware {
+  /**
+   * @param {MiddlewareFunc} func
+   */
+
+  // store the callback and req obj
+  constructor() {
+    this.callback = [];
+    this.req = null;
+  }
+
+  use(func) {
+    // push the func to callback queue
+    this.callback.push(func);
+  }
+
+  /**
+   * @param {Request} req
+   */
+  start(req) {
+    // in start update the req obj
+    this.req = req;
+    this.next();
+  }
+
+  // next func receives err obj
+  next = (err) => {
+    // get the function from queue
+    let nextFunc = this.callback.shift();
+
+    // check nextFunc is normal fn or fn with error handler
+    try {
+      if (nextFunc.length == 2) {
+        // normal fn
+        if (!err) {
+          nextFunc(this.req, this.next);
+        } else {
+          // if err, then skip the callback and move next till we find the errorHandler
+          this.next(err);
+        }
+      } else {
+        nextFunc(err, this.req, this.next);
+      }
+    } catch (e) {
+      // if error move to next fb
+      this.next(e);
+    }
+  };
+}
+```
+
+[Question link](https://bigfrontend.dev/problem/create-a-middleware-system)
