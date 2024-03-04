@@ -1,0 +1,46 @@
+---
+title: "useEffect hook and sideEffects - react"
+publishedAt: "2024-3-4"
+updatedAt: "2024-3-4"
+tags:
+  - React
+  - useEffect
+  - sideEffects
+---
+
+## What is sideEffects ?
+
+sideEffects means interaction between `react component and world outside the component`.
+
+examples of sidEffects like:
+
+- data fetching
+- setting subscription
+- setting timers
+- manually accessing DOM Elements etc.
+
+## Why do we need useEffect ?
+
+we can't write the sideEffects directly in `render logic` it may cause infinite loop so
+we need useEffect to run this sideEffects after page is rendered initially (mount).
+
+with useEffect we can run the effects are different moments like mount, unmount, render phase.
+
+## Async in useEffect 
+
+we `can't directly call async function` inside useEffects to avoid `race conditions`
+
+we can write like 
+
+```jsx 
+useEffect(function() {
+
+    async function fetch() {
+        const res = await fetch("....");
+        const data = res.json();
+        setData(data);
+    }
+    fetch();
+} , [])
+
+```
