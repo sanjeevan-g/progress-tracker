@@ -17,7 +17,7 @@ export default function Page() {
         return searchQuery.length < 3 || post.title.toLowerCase().includes(searchQuery.toLowerCase()) || post.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     });
 
-    postData.sort( (a, b) => compareDesc(parseISO(a.publishedAt), parseISO(b.publishedAt)) )
+    postData.sort((a, b) => compareDesc(parseISO(a.publishedAt), parseISO(b.publishedAt)))
 
     return <section>
         <h1 className="font-medium text-2xl  mb-8">
@@ -36,9 +36,15 @@ export default function Page() {
 }
 
 function PostComp({ post }: { post: Post }) {
+
     return <Link href={`posts/${post.url}`} className="flex">
-        <div className="flex flex-col">
+        <article>
             <p className=" text-xl"> {post.title} </p>
+            <p className="my-1 italic text-neutral-700  dark:text-zinc-200">{new Date(post.publishedAt).toLocaleDateString("en", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+            })}</p>
             {post.tags
                 ?
                 <ul className="flex gap-x-2 flex-wrap">
@@ -48,6 +54,6 @@ function PostComp({ post }: { post: Post }) {
                 </ul>
                 : ""
             }
-        </div>
+        </article>
     </Link>
 }

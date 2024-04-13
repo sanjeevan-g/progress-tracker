@@ -1,11 +1,10 @@
-import Link from "next/link";
-import { BsArrowLeft } from "react-icons/bs";
-import { useMDXComponent } from 'next-contentlayer/hooks'
 import { allPosts } from "contentlayer/generated";
-import { notFound } from "next/navigation";
-import type { Metadata } from 'next';
-import { parseISO } from "date-fns";
 import format from "date-fns/format";
+import type { Metadata } from 'next';
+import { useMDXComponent } from 'next-contentlayer/hooks';
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { BsArrowLeft } from "react-icons/bs";
 
 type Params = { params: { slug: string } }
 
