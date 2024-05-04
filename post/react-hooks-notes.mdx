@@ -1,0 +1,31 @@
+---
+title: "React Notes - Hooks"
+publishedAt: "2024-5-2"
+updatedAt: "2024-5-2"
+tags:
+  - React
+  - Notes
+  - Hooks
+---
+
+## What are hooks ?
+
+hooks are special functions or api's that exposes React internals
+
+- creating and accessing state from React
+- registering `sideEffects` in React.
+
+All hooks starts with `use` keyword.
+
+With `custom-hooks` we can now reuse non-visual logics.
+
+## Rules of hooks
+- Call hooks only at top level
+  - don't call inside conditions, loops etc
+  - hooks should be called in same order
+- call hooks only inside `Functional` components.
+
+## Hooks rely on call order:
+- React `Fiber` holds list of hooks used, this list is an `linkedList` with initialized order.
+- Since it's a linkedlist, one hook is attached to the end to another hook
+- if we initialize hook inside condition then on next re-render it may break the linkedlist order 

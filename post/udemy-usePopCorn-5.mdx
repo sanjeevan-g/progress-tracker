@@ -1,0 +1,22 @@
+---
+title: "usePopCorn udemy project - part 4"
+publishedAt: "2024-5-4"
+updatedAt: "2024-5-4"
+tags:
+  - React
+  - Udemy
+  - useState
+---
+
+usePopCorn udemy project used to search for movies from api and able to add rating to those movies and add them to our watchlist
+
+## useState
+- useState hook also accepts callback fn as an argument
+- if we need any computation to be done to initialize the state when we can pass callback function. this is called lazy evaluation.
+- the callback function will be called only on initial render, function has to be pure and accept no arguments.
+
+## Added
+- we will store the watched movies to localStorage using useEffect, which will retain the state on refresh.
+
+
+[Stackblitz repo link](https://stackblitz.com/edit/vitejs-vite-jjr5yd?file=src%2FApp.jsx)
