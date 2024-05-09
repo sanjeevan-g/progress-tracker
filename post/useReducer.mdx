@@ -1,0 +1,44 @@
+---
+title: "useReducer notes"
+publishedAt: "2024-5-9"
+updatedAt: "2024-5-9"
+tags:
+  - useReducer
+  - udemy
+  - react
+---
+
+## useReducer
+
+it is similar to useState for managing the state, but in complex way.
+
+useReducer hook accepts 2 arguments, reducer function and initial state.
+
+## Code
+
+```jsx
+
+import { useReducer } from 'react';
+
+function reducer(state, action) {
+  // ...
+}
+
+function MyComponent() {
+  const [state, dispatch] = useReducer(reducer, { age: 42 });
+  // ...
+
+```
+
+## Reducer
+
+- in `reducer` function we will specify how to compute new state.
+- it accepts cur state and action
+- action is the data we pass through dispatch function
+
+## Dispatch
+
+- to update the state we call `dispatch` function
+- it accepts data which will be passes as `action` argument in reducer function.
+- action data could be of any type
+- common form of action is ```{type: 'string', payload: 'data'}``` 
