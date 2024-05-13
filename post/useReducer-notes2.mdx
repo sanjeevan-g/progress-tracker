@@ -1,0 +1,24 @@
+---
+title: "useReducer notes - 2"
+publishedAt: "2024-5-13"
+updatedAt: "2024-5-13"
+tags:
+  - useReducer
+  - udemy
+  - react
+---
+
+## Mental Modal behind useReducer
+
+useState is like directly updating the state.
+
+for useReducer: we will pass action object to reducer function using `dispatch` method,
+then reducer will decide how to update the state.
+
+## When to use useReducer instead of useState
+
+- when we have to do complex state updates
+
+- when one state update will trigger many other state updates
+
+- when we need other state values to calculate state values.
