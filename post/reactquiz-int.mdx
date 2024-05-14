@@ -1,0 +1,48 @@
+---
+title: "udemy react quiz app - init"
+publishedAt: "2024-5-14"
+updatedAt: "2024-5-14"
+tags:
+  - React
+  - quiz
+  - useReducer
+---
+
+## Quizz app
+
+## init
+
+- initialized quizz app in github
+- added static view components like header, loader, error etc
+- used `json-server` to mock api entry point
+- used `fetchWithTimeout ` to abort the fetch request after certain duration.
+- used `useReducer` hook to manage state for our app
+- state object has `questions` and `status` properties
+- status has `loading` (initial), `error`, `ready` values
+
+```js
+async function fetchWithTimeout(url, duration = 2000) {
+  return new Promise((resolve, rej) => {
+    const abortController = new AbortController();
+
+    let timerId = null;
+
+    fetch(url, {
+      signal: abortController.signal,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        clearTimeout(timerId);
+        resolve(data);
+      })
+      .catch((e) => {
+        rej(e);
+      });
+
+    // after duration abort the fetch
+    setTimeout(() => {
+      abortController.abort();
+    }, duration);
+  });
+}
+```
