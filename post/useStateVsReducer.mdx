@@ -1,0 +1,24 @@
+---
+title: "useState vs useReducer"
+publishedAt: "2024-5-17"
+updatedAt: "2024-5-17"
+tags:
+  - React
+  - useState
+  - useReducer
+---
+
+| useState                                                                                                             | useReducer                                                                                      |
+| -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| ideal for single, independent states like string,number,arrays                                                       | ideal for complex and related pieces of state like nested objects etc                           |
+| logic to update the state is placed directly inside event handlers or effects and spread over one or more components | logic to update the state lives in one single place, decoupled from components called `reducer` |
+| state is updated by calling setState                                                                                 | state is updated by dispatching action to reducer                                               |
+| imperative state updates                                                                                             | more declarative state updates passing relavent action type to reducer                          |
+| easy to understand                                                                                                   | bit complex to understand                                                                       |
+
+## when to use useReducer
+
+- just one piece of state -> (no) -> useReducer
+- Do state frequently update together -> (yes) -> (willing to write slightly more complex code ) (yes) -> useReducer
+- Over 3 or 4 pieces of state including objects
+- Too many event handlers make components large and complicated
