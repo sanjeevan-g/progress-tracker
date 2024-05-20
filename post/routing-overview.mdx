@@ -1,0 +1,34 @@
+---
+title: "Routing Overview and CSS in react"
+publishedAt: "2024-5-20"
+updatedAt: "2024-5-20"
+tags:
+  - React
+  - Routing
+  - CSS
+---
+
+## Routing Overview
+
+- `react-router-dom` package for page routing.
+- wrap the App.jsx with `BrowserRouter` and `Routes` tag.
+- Add `Route` tag to show matching component
+
+```jsx
+<BrowserRouter>
+  <Routes>
+    <Route path="/" element={<Homepage />} />
+    <Route path="/product" element={<Product />} />
+    <Route path="/pricing" element={<Pricing />} />
+    <Route path="*" element={<PageNotFound />} />
+  </Routes>
+</BrowserRouter>
+```
+- all the router related tags have to be placed inside `BrowserRouter` tag
+
+## CSS in react
+
+- we can use inline styles, external css files (css files, scss files)
+- css modules which are component scope
+- JS frameworks like styled components and emotion js
+- Utility first frameworks like Tailwind
