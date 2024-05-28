@@ -1,0 +1,79 @@
+---
+title: "udemy worldwise project - 4"
+publishedAt: "2024-5-27"
+updatedAt: "2024-5-27"
+tags:
+  - React
+  - Routing
+  - CSS module
+---
+
+## useParams
+
+useParams hook can be used to get `key/value` pair of dynamic params in the url
+
+for `dynamic params` we have to add matching `Route`
+
+```jsx
+<Route path="cities/:id" element={<City />} />
+```
+
+here `/:id` is the params
+
+useParams hook will return value of the dynamic params with `id` as key.
+
+```js
+{
+  id: 111;
+}
+```
+
+## useSearchParams
+
+useSearchParams hook is used to read and modify query string in the url.
+
+for url `http://localhost:5173/app/cities/73930385?lat=38.72&lng=-9.14`
+
+```jsx
+let [searchParams, setSearchParams] = useSearchParams();
+const lat = searchParam.get("lat"); // 38.72
+const lng = searchParam.get("lng"); // -9.14
+```
+
+we have to use `get(key)` method to get the value of the query string with `key` as key.
+
+```jsx
+setSearchParam({ lat: 50, lng: 100 });
+```
+
+setSearchParam will delete existing query string and will add given object as `new` query string.
+
+## Programmatic navigation
+
+sometimes we need to Programmaticaly move to another page
+eg: move to profile page after signIn etc
+
+### useNavigate
+
+useNavigate hook will return `navigate` function
+
+this navigate function we can navigate to the specified page or move back or foward page
+
+```jsx
+const navigate = useNavigate();
+
+navigate("form"); // navigate to form page
+
+navigate(-1); // navigate to previous page
+navigate(1); // navigate to next page (forward) in browser history
+```
+
+### Navigate
+
+```jsx
+<Navigate replace to="/cities" />
+```
+
+`Navigate` tag act like a redirect, we can use this when we can't use useNavigate hook.
+
+`replace` will replace the current entry in the history stack instead of adding a new one.
