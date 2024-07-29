@@ -1,0 +1,64 @@
+---
+title: "React Optimization part 1"
+publishedAt: "2024-7-29"
+updatedAt: "2024-7-29"
+tags:
+  - React
+  - Optimization
+  - Children Prop
+---
+
+## When will a component re render ?
+
+1. on state change
+2. on subscribed context change
+3. on parent state change
+
+`on props change react component will not be re rendered`
+
+## Our Issue
+
+```jsx
+export default function Test() {
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+      <h1>Slow counter?!?</h1>
+      <button onClick={() => setCount((c) => c + 1)}>Increase: {count}</button>
+      <SlowComponent />
+    </div>
+  );
+}
+```
+
+- `SlowComponent` is a stand-alone component with huge amount of data to be rendered
+- it will be re rendered on each state update as it is a child component.
+
+## Optimization
+```jsx
+const Counter = ({ children }) => {
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+      <h1>Slow counter?!?</h1>
+      <button onClick={() => setCount((c) => c + 1)}>Increase: {count}</button>
+      {children}
+    </div>
+  );
+};
+
+export default function Test() {
+  return (
+    <div>
+      <Counter>
+        {/* here slowComponent is passes as prop so it won't be re-rendered on counter comp re-render */}
+        <SlowComponent />
+      </Counter>
+    </div>
+  );
+}
+```
+1. Try to pass this SlowComponent as children or prop to the state component.
+2. At the time of creating `Counter`, `SlowComponent` is also been created and passed as prop
+3. Since it is a prop, on re-render it won't be re-rendered
+4. But on `Test` component re-render, `SlowComponent` is also re-rendered again.
