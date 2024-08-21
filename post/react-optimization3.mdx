@@ -1,0 +1,39 @@
+---
+title: "React Optimization part 3"
+publishedAt: "2024-8-21"
+updatedAt: "2024-8-21"
+tags:
+  - Code splitting
+  - Bundling
+  - Lazy loading
+---
+
+## Bundle
+
+- Initially server will sent a single javascript file (`Bundle`) to the browser that contains entire application code.
+
+- The application will execute only after the code get downloaded.
+
+- If the bundle size is large, then it will take more time for the application to start in the browser.
+
+## Code splitting
+
+- Instead of sending whole bundle file, we can split the code into smaller juncks and send the files to the browser if required.
+
+- this lazy loading will optimize the loading time in the browser
+
+## Code splitting in React
+
+```jsx
+// import Product from "./pages/Product";
+
+const Product = lazy(() => import("./pages/Product"));
+
+<Suspense fallback={<SpinnerFullPage />}>
+  <Product />
+</Suspense>;
+```
+
+- Instead of normal import, use `dynamic import` using `lazy` function in react.
+- lazy will return a promise, which will be resolved when the component rendered for the first time.
+- wrap the component with `Suspense with fallback`.

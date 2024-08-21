@@ -1,0 +1,19 @@
+---
+title: "useEffect Rules"
+publishedAt: "2024-8-21"
+updatedAt: "2024-8-21"
+tags:
+  - dependency array
+---
+
+## useEffect Rules and Best Practices
+
+### Dependency Array 
+- every `state` value, `prop`, `context value` used inside the useEffect must be added in dependency array
+- must include `reactive values` i.e `variables` or `functions` that reference any other reactive values.
+    - function that uses state or props or context etc
+    - derived states etc
+- use `eslint` to check for missing dependencies.
+- use `useMemo` or `useCallback` to cache the dependencies, if they are reference values like object or function.
+- If we need to include multiple reactive elements that are releated to one another, we can use `useReducer` hook
+- `setState` and `dispatch` functions are still the same on each render, no need to include in dependency array. 
