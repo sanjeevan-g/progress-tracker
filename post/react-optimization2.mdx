@@ -1,0 +1,39 @@
+---
+title: "React Optimization part 2"
+publishedAt: "2024-8-11"
+updatedAt: "2024-8-11"
+tags:
+  - React
+  - Optimization
+  - useCallback
+  - useMemo
+  - memo
+---
+
+## memo
+
+- on state update, all the child components will re-render, if we don't want to re-render lagy component again and again,
+- then we can memoize the child components with `memo`
+
+```jsx
+const LazyComponent = memo(function LazyComponent() {
+  return <>...</>;
+});
+```
+
+## useCallback and useMemo
+
+- memoize values with `useMemo` and functions with `useCallback`
+- both have dependency arrays
+
+### useMemo
+- it takes a `function` and store the result of the function in cache
+- when dependency array values changes, function will be re executed and new value will be cached
+
+### useCallback
+- similar to `useMemo` but it will cache the function.
+
+## usecases:
+- memoize the props to avoid waste render ( with memo the component)
+- memo value of expensive calculations
+- memomize value of dependency array of another hook to avoid infinite loop
