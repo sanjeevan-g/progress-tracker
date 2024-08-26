@@ -1,0 +1,19 @@
+---
+title: "useEffect Closure"
+publishedAt: "2024-8-26"
+updatedAt: "2024-8-26"
+tags:
+  - closure
+  - react
+---
+
+## What is Closure ?
+
+function that has access to parent scope variables even after the parent function is executed or returned.
+
+## closure in useEffect:
+
+in useEffect, useCallback or useMemo, the function will have access to props or state or any reactive elements at the time
+of init or creation. i.e the function will refer that particular value `previous snapshot or stale value`.
+
+so thats why we use dependency array to recreate or re-initialize the function if any reactive value updates.
