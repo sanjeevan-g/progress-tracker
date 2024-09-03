@@ -17,5 +17,15 @@ tags:
   1. classic redux
   2. Redux Toolkit
 
-## When to use Redux 
+## When to use Redux
+
 - only when the `global state` updates more frequently.
+
+## Machanism of redux:
+
+1. The `event handler` will call the `action creator function`
+2. `action creator function` will creation action for us.
+3. the action will be passes to `dispatch function`
+4. the dispatch function will call the correct reducer in global store
+   - global store is where the `state` is stored, it has `multiple reducers` for each states.
+5. after state update, the `component subscribed` to the state will `re-render`.
