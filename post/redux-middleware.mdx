@@ -1,0 +1,71 @@
+---
+title: "Redux Middleware - thunks"
+publishedAt: "2024-9-10"
+updatedAt: "2024-9-10"
+tags:
+  - redux
+  - thunks
+---
+
+## How to do Asynchronous calls in Redux ?
+
+- we can't do data fectching in store, since reducers are pure functions
+- we can use useEffect to fetch data at component level and dispatch the data to store
+  but it is not the right way
+- we will use Middleware to handle this sideeffect
+
+## Middleware
+
+- middleware is a function that sit between dispatch and the store (reducer)
+- after the dispatch, middleware get called then the store's reducer function will be called.
+- we will use `thirdParty library` called `thunks` as middleware.
+- with the middlewares, data fectching and data convertion are not present `component level`
+- this actions are encapsulated in the `actionCreator or thunk` functions.
+
+## steps to use middleware
+
+- install
+- apply middleware to the store
+  - `const store = createStore(rootReducer, applyMiddleware(thunk));`
+- use the middleware
+
+## Thunk
+
+- In `Action Creator` fn if we return obj, then it will directly dispatch the object.
+- If it is function then it is a `thunk` function.
+
+```js
+return (dispatch, getState) => {
+  // logic here that can dispatch actions or read state
+};
+```
+
+- thunk function can we async too
+- thunk function has access to dispatch and getState functions
+- after sideeffect (data compute), we can call dispatch function to update the store
+- Inside thunk, we can `call dispatch` function `multiple times` to set different states.
+
+```js
+export function deposit(amount, currency) {
+  /* 
+    if currency is usd no action needed, return action object
+    */
+  if (currency === "USD") return { type: "account/deposit", payload: amount };
+
+  // else use thunk, return thunk function
+  return async function (dispatch, getState) {
+    // set isloading true
+    dispatch({
+      type: "account/convertingCurrency",
+    });
+
+    const res = await fetch(
+      `https://${host}/latest?amount=${amount}&from=${currency}&to=USD`
+    );
+    const data = await res.json();
+
+    const convertedAmount = data.rates.USD;
+    dispatch({ type: "account/deposit", payload: convertedAmount });
+  };
+}
+```
