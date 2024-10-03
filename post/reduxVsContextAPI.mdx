@@ -1,0 +1,51 @@
+---
+title: "Redux vs ContextAPI"
+publishedAt: "2024-10-3"
+updatedAt: "2024-10-3"
+tags:
+  - redux
+  - redux toolkit
+  - contextAPI
+---
+
+## ContextAPI
+
+#### Pros
+
+- Built into react
+- Easy to setup single context
+
+#### cons
+
+- Additional state (slice) requires additional providers from scratch, which can result in `Provider Hell`
+- No mechanism for `async` operations
+- `performance optimization` is pain
+- only react devtools support.
+
+## Redux
+
+#### cons
+
+- Requires additional packages
+- More work at initial setup
+
+### Pros
+
+- after setup, `easy` to add additional State (`slice`)
+- has `middleware` for async operations. (should not use this mechanism for remote state )
+- `performance` is optimized on `out of the box`
+- Excellent devtools.
+
+
+## When to use what ?? 
+
+### ContextAPI
+- global state management for small apps
+- When we need to share a value that doesn't change often like theme-color, auth info etc
+- when we need to solve `prop drilling` issue
+- when we need to manage state in `local sub tree` of the app.
+
+### Redux 
+- manage global state for large apps
+- when we have lot of global UI state that updated frequently.
+- when we have complex state like nested objects and arrays.
