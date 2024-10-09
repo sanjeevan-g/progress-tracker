@@ -1,0 +1,81 @@
+---
+title: "Data Fething in react router DOM"
+publishedAt: "2024-10-9"
+updatedAt: "2024-10-9"
+tags:
+  - router
+  - react
+---
+
+## Data Fetching
+
+In react router DOM 6.4+, we have an option to fetch data called `loaders` on visiting the route. and data is to to
+path element.
+
+`Render as you fetch` Strategy.
+
+`Data is ready before or on rendering parallel`.
+
+## 3 steps to use loaders
+
+- create Loader
+- attach loader to the route
+- in route element, get data using customHook
+
+## Step1: create Loader
+
+- In loader function, we have all the data Fetching logic and return the data.
+- As a convention, we place the loader fn inside the route element page.
+
+```jsx
+export async function loader() {
+  const data = await getData();
+
+  return data;
+}
+```
+
+## Step2: attach loader to the route
+
+attach the loader to the route object
+
+```jsx
+
+import { loader as menuLoader } from "./Menu";
+
+const route = createBrowserRouter([
+    {
+        path: "/menu",
+        element: '<Menu />'
+        loader: menuLoader // attached the loader
+    }
+])
+
+```
+
+## Step3: get data
+
+in Menu Component, get the data using `useLoaderData` hook.
+
+```jsx
+const data = useLoaderData();
+```
+
+## Show Loading State on load
+
+`useLoaderData` hook don't provide any loading state functionality. Instead we will use
+`useNavigation` hook, it returns an object contain current state of the `entire route`
+
+we will add useNavigation hook in the parent `AppLayout` Component.
+
+```JSX
+const navigation = useNavigation();
+const isLoading = navigation.state === 'loading';
+
+return (
+    <>
+    ...
+    {isLoading && <Loader/>}
+    </>
+)
+```
