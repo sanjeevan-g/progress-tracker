@@ -1,0 +1,54 @@
+---
+title: "Actions in react router DOM"
+publishedAt: "2024-10-10"
+updatedAt: "2024-10-10"
+tags:
+  - router
+  - react
+  - actions
+---
+
+## What is Action in react router DOM ?
+
+Actions are used to write data or used to mutate data which are stored in global state.
+
+## How to use Action
+
+Actions are called when the app sends non-get submissions to the route (delete, post, patch, put).
+
+- use `<Form>` tag from react router DOM instead of normal HTML form for submissions.
+
+- creation action function similar to loader function and attach it to the route.
+  - action function should return someThing, can't be empty
+
+```jsx
+// action function
+export async function action({ request }) {
+  const formData = await request.formData(); // will get formData object
+  const data = object.formEntries(formData);
+
+  const errors = {}
+  if(!isValid(data)) {
+    errors.message = "Invalid form data"
+  }
+
+  if(Object.keys(errors).length > 0) return errors;
+
+  console.log(data); // will get our form object. [name : value]
+
+  // this return data can we received in component by using "useActionData"
+  return data || null;
+}
+// route component
+function Component() {
+  // we can receive data sent by action function
+  const formError = useActionData();
+
+  return (
+    <>
+    ....
+    {formError?.message && <p>{formError.message}</p>}
+    </>
+  )
+}
+```
