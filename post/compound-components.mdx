@@ -1,0 +1,28 @@
+---
+title: "Compound Components pattern in react"
+publishedAt: "2025-02-20"
+updatedAt: "2025-02-20"
+tags:
+  - React
+  - Patterns
+---
+
+## What is Compound Components ?
+we will create a set of `related` components, combined together to form a big larger components.
+like select component with options, select component.
+
+## Why ?
+these Patterns give more flexibility in determine the component order etc. so we don't need to pass `props` to make changes in component placements or styling
+we can style or modify each inner (or) smaller components individually.
+
+## Internal Working:
+these related component have access to common state, we use `context API` for that.
+
+steps:
+- create a context
+- create the parent component
+- create child components 
+- make the child component as property for main Parent component
+
+## Code Link
+[codesandbox Link](https://codesandbox.io/p/devbox/react-compound-components-starter-forked-g9s7gw?workspaceId=ws_Q2D1ZaFJPncTkiFWB7qqbQ)
